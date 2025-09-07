@@ -1,37 +1,59 @@
-﻿# Large dataset files
-Geolife Trajectories 1.3/
-Geolife Trajectories 1.3.zip
+﻿# Virtual environment
+.venv/
+venv/
+env/
 
-# Model files (too large for Git)
-trained_tourist_safety_model.pkl
+# Logs
+logs/
+*.log
 
-# Python cache
+# Model files (large)
+*.pkl
+*.joblib
+*.h5
+*.model
+
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
+*.egg-info/
+dist/
+build/
 
-# Virtual environments
-venv/
-env/
-ENV/
-
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-*
 
-# OS files
+# OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# Output files
+# Secrets and environment
+.env
+.env.local
+.env.production
+secrets.json
+
+# Data files
 *.csv
-*.png
-*.jpg
-*.jpeg
+*.json
+data/
+datasets/
 
-# Logs
-*.log
+# Jupyter
+.ipynb_checkpoints/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+docs/_build/
