@@ -46,6 +46,8 @@ secrets.json
 *.json
 data/
 datasets/
+*.zip
+Geolife Trajectories 1.3/
 
 # Jupyter
 .ipynb_checkpoints/
