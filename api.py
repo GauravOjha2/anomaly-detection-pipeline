@@ -1,25 +1,79 @@
 # api.py
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from schemas import TelemetryEvent, DetectResponse
 from anomaly_detector import detect_from_event
 from fastapi import Body
 import os
 import json
 from pathlib import Path
+import httpx
+from typing import Optional
 
-app = FastAPI()
+app = FastAPI(title="Anomaly Detection Pipeline", version="1.0.0")
+
+# Alert system integration
+ALERT_SYSTEM_URL = os.getenv("ALERT_SYSTEM_URL", "http://localhost:8001")
+
+async def send_to_alert_system(response: DetectResponse):
+    """Send detection results to alert system for processing"""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            await client.post(
+                f"{ALERT_SYSTEM_URL}/process-alerts",
+                json=response.dict()
+            )
+    except Exception as e:
+        print(f"Failed to send to alert system: {e}")
 
 @app.post("/detect", response_model=DetectResponse)
-def detect(e: TelemetryEvent):
-    return detect_from_event(e.dict())
+async def detect(e: TelemetryEvent, bg: BackgroundTasks):
+    """Detect anomalies and send to alert system"""
+    response = detect_from_event(e.dict())
+    
+    # Send to alert system in background if anomalies found
+    if response.anomaly_count > 0:
+        bg.add_task(send_to_alert_system, response)
+    
+    return response
 
 @app.post("/detect_batch")
-def detect_batch(events: list[TelemetryEvent] = Body(...)):
+async def detect_batch(events: list[TelemetryEvent] = Body(...), bg: BackgroundTasks = None):
+    """Detect anomalies in batch and send to alert system"""
     import pandas as pd
     df = pd.DataFrame([e.dict() for e in events])
     from anomaly_detector import detect_from_event_batch
-    return detect_from_event_batch(df)
+    result = detect_from_event_batch(df)
     
+    # Send to alert system in background if anomalies found
+    if result.get("anomaly_count", 0) > 0 and bg:
+        # Convert to DetectResponse format for alert system
+        from schemas import DetectResponse, Alert
+        alerts = [Alert(**alert) for alert in result.get("alerts", [])]
+        response = DetectResponse(
+            status=result["status"],
+            anomaly_count=result["anomaly_count"],
+            alerts=alerts
+        )
+        bg.add_task(send_to_alert_system, response)
+    
+    return result
+    
+@app.get("/")
+def root():
+    return {
+        "message": "Anomaly Detection Pipeline API",
+        "version": "1.0.0",
+        "status": "running",
+        "endpoints": {
+            "detect": "/detect",
+            "detect_batch": "/detect_batch", 
+            "health": "/health",
+            "health_details": "/health/details",
+            "docs": "/docs"
+        },
+        "alert_system_url": ALERT_SYSTEM_URL
+    }
+
 @app.get("/health")
 def health():
     return {"status": "ok"}

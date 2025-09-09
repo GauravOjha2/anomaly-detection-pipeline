@@ -75,7 +75,7 @@ def detect_anomalies(data, model_path='trained_tourist_safety_model.pkl', return
     
     # Get anomaly indices (where prediction == -1)
     anomaly_indices = np.where(predictions == -1)[0]
-    DEMO_RULES = os.getenv("DEMO_RULES") == "1"
+    DEMO_RULES = os.getenv("DEMO_RULES", "1") == "1"  # Enable demo rules by default
     if DEMO_RULES:
         # features is already computed above
         velocities_kmh = features[:, 5] if features.shape[1] > 5 else np.zeros(len(data))
@@ -171,7 +171,7 @@ def detect_from_event(event: dict) -> DetectResponse:
             alert_level=SEVERITY_MAP.get(a["anomaly_type"], "INFO"),
             confidence_score=a.get("confidence_score", 0.0),
             location={"lat": te.lat, "lng": te.lng},
-            timestamp=te.timestamp,
+            timestamp=te.timestamp.isoformat() if hasattr(te.timestamp, 'isoformat') else te.timestamp,
             raw_evidence=te.dict(),
             model_version=MODEL_VERSION
         ))
@@ -194,13 +194,19 @@ def detect_from_event_batch(df: pd.DataFrame):
     results = []
     for idx, a in zip(anomaly_indices, alerts):
         row = df.iloc[int(idx)]
+        timestamp_val = row.get("timestamp")
+        if isinstance(timestamp_val, str):
+            timestamp_val = pd.to_datetime(timestamp_val)
+        elif hasattr(timestamp_val, 'isoformat'):
+            timestamp_val = timestamp_val.isoformat()
+        
         results.append(Alert(
             tourist_id=str(row.get("tourist_id", "")),
             anomaly_type=a["anomaly_type"],
             alert_level=SEVERITY_MAP.get(a["anomaly_type"], "INFO"),
             confidence_score=a.get("confidence_score", 0.0),
             location={"lat": float(row.get("lat", 0.0)), "lng": float(row.get("lng", 0.0))},
-            timestamp=pd.to_datetime(row.get("timestamp")),
+            timestamp=timestamp_val,
             raw_evidence=row.to_dict(),
             model_version=MODEL_VERSION
         ).dict())
