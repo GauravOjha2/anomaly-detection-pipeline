@@ -8,10 +8,7 @@ logs/
 *.log
 
 # Model files (large)
-*.pkl
-*.joblib
-*.h5
-*.model
+
 
 # Python
 __pycache__/
