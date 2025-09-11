@@ -17,11 +17,29 @@ ALERT_SYSTEM_URL = os.getenv("ALERT_SYSTEM_URL", "http://localhost:8001")
 async def send_to_alert_system(response: DetectResponse):
     """Send detection results to alert system for processing"""
     try:
+        # Convert to dict and serialize datetime objects properly
+        data = response.dict()
+        
+        # Convert datetime objects to ISO format strings recursively
+        def serialize_datetime(obj):
+            if hasattr(obj, 'isoformat'):
+                return obj.isoformat()
+            elif isinstance(obj, dict):
+                return {k: serialize_datetime(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [serialize_datetime(item) for item in obj]
+            else:
+                return obj
+        
+        # Apply serialization to the entire data structure
+        serialized_data = serialize_datetime(data)
+        
         async with httpx.AsyncClient(timeout=10.0) as client:
             await client.post(
                 f"{ALERT_SYSTEM_URL}/process-alerts",
-                json=response.dict()
+                json=serialized_data
             )
+            print(f"✅ Successfully sent {len(data.get('alerts', []))} alerts to alert system")
     except Exception as e:
         print(f"Failed to send to alert system: {e}")
 
