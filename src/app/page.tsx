@@ -166,7 +166,7 @@ const techStack = [
 function RadarBackground() {
   return (
     <div className="fixed inset-0 flex items-center justify-center pointer-events-none -z-10 overflow-hidden">
-      <div className="relative w-[600px] h-[600px] opacity-30">
+      <div className="relative w-[400px] h-[400px] opacity-20">
         {/* Concentric rings */}
         <div className="radar-ring radar-ring-4" />
         <div className="radar-ring radar-ring-3" />
