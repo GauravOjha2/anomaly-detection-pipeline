@@ -13,7 +13,6 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -32,7 +31,6 @@ body {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Glass card */
 .glass {
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
@@ -45,7 +43,6 @@ body {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Gradient text */
 .gradient-text {
   background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.6) 100%);
   -webkit-background-clip: text;
@@ -60,7 +57,6 @@ body {
   background-clip: text;
 }
 
-/* Grid background */
 .grid-bg {
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
@@ -68,7 +64,6 @@ body {
   background-size: 60px 60px;
 }
 
-/* Noise overlay */
 .noise-bg::before {
   content: "";
   position: fixed;
@@ -80,7 +75,6 @@ body {
   pointer-events: none;
 }
 
-/* Glow effects */
 .glow-accent {
   box-shadow: 0 0 30px rgba(99, 102, 241, 0.15), 0 0 60px rgba(99, 102, 241, 0.05);
 }
@@ -93,13 +87,11 @@ body {
   box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
 }
 
-/* Stat counter animation */
 @keyframes countUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Scan line for terminal effect */
 .terminal-scan::after {
   content: "";
   position: absolute;
@@ -116,7 +108,6 @@ body {
   100% { top: 100%; }
 }
 
-/* Gradient border */
 .gradient-border {
   position: relative;
 }
@@ -135,28 +126,6 @@ body {
   pointer-events: none;
 }
 
-/* Blob gradient backgrounds */
-.blob-1 {
-  position: fixed;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
-  filter: blur(80px);
-  pointer-events: none;
-}
-
-.blob-2 {
-  position: fixed;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
-  filter: blur(60px);
-  pointer-events: none;
-}
-
-/* Status badge pulse */
 .status-pulse {
   animation: statusPulse 2s ease-in-out infinite;
 }
@@ -164,4 +133,163 @@ body {
 @keyframes statusPulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+.radar-grid-bg {
+  background-color: #0a0f0a;
+  background-image: 
+    radial-gradient(circle, rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+    radial-gradient(circle, rgba(0, 255, 136, 0.02) 1px, transparent 1px),
+    linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+  background-size: 100px 100px, 200px 200px, 50px 50px, 50px 50px;
+  background-position: 0 0, 0 0, 25px 25px, 25px 25px;
+}
+
+.radar-ring {
+  position: absolute;
+  border: 1px solid rgba(0, 255, 136, 0.1);
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.radar-ring-1 { width: 40%; height: 40%; }
+.radar-ring-2 { width: 60%; height: 60%; }
+.radar-ring-3 { width: 80%; height: 80%; }
+.radar-ring-4 { width: 100%; height: 100%; }
+
+.radar-sweep {
+  position: absolute;
+  width: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.8), rgba(0, 255, 136, 0.3));
+  top: 50%;
+  left: 50%;
+  transform-origin: left center;
+  animation: radarSweep 4s linear infinite;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+.radar-center {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #00ff88;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 15px #00ff88, 0 0 30px rgba(0, 255, 136, 0.5);
+}
+
+.radar-blip {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #00ff88;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00ff88, 0 0 20px rgba(0, 255, 136, 0.5);
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+.radar-blip.critical {
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+.radar-blip.warning {
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b, 0 0 20px rgba(245, 158, 11, 0.5);
+}
+
+.ping-effect {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 255, 136, 0.5);
+  border-radius: 50%;
+  animation: radarPing 2s ease-out infinite;
+}
+
+.ping-effect.critical {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.radar-card {
+  background: rgba(0, 20, 10, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.radar-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.5), transparent);
+}
+
+.radar-card:hover {
+  border-color: rgba(0, 255, 136, 0.3);
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+}
+
+.radar-glow {
+  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5), 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.radar-border-glow {
+  box-shadow: 
+    0 0 1px rgba(0, 255, 136, 0.3),
+    inset 0 0 20px rgba(0, 255, 136, 0.05);
+}
+
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+  animation: scanLine 3s linear infinite;
+}
+
+@keyframes radarSweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes radarPing {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.radar-gradient-text {
+  background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #00ff88 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.dot-grid {
+  background-image: radial-gradient(rgba(0, 255, 136, 0.15) 1px, transparent 1px);
+  background-size: 20px 20px;
 }

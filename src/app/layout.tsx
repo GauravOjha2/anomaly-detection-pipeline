@@ -35,10 +35,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#09090b] text-white noise-bg`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0a0f0a] text-white noise-bg`}
       >
-        <div className="blob-1 top-[-200px] left-[-100px]" />
-        <div className="blob-2 bottom-[-100px] right-[-100px]" />
+        <div className="radar-grid-bg fixed inset-0 -z-10" />
         {children}
       </body>
     </html>

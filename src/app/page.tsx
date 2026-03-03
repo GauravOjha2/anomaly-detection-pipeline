@@ -14,7 +14,7 @@ import {
   Radio,
   Server,
   Shield,
-  Sparkles,
+  Crosshair,
   Terminal,
   Zap,
 } from "lucide-react";
@@ -48,7 +48,11 @@ const pipelineSteps = [
       "Heart rate + battery monitoring",
       "Panic button + network status",
     ],
-    terminal: `> ingest_telemetry(batch_size=30)\n> validating schema... OK\n> 30 events received\n> normalizing coordinates...\n> ready for feature extraction_`,
+    terminal: `> ingest_telemetry(batch_size=30)
+> validating schema... OK
+> 30 events received
+> normalizing coordinates...
+> ready for feature extraction_`,
   },
   {
     num: "02",
@@ -61,7 +65,12 @@ const pipelineSteps = [
       "Rolling mean/std (window=5)",
       "Z-score outlier detection",
     ],
-    terminal: `> extract_features(n=20)\n> computing haversine distances...\n> velocity: 4.2 km/h (normal)\n> bearing_change: 12.3 deg\n> z_score: 0.3 (within bounds)\n> 20-dim vector ready_`,
+    terminal: `> extract_features(n=20)
+> computing haversine distances...
+> velocity: 4.2 km/h (normal)
+> bearing_change: 12.3 deg
+> z_score: 0.3 (within bounds)
+> 20-dim vector ready_`,
   },
   {
     num: "03",
@@ -74,7 +83,13 @@ const pipelineSteps = [
       "Confidence scoring per model",
       "Rule-based classification overlay",
     ],
-    terminal: `> ensemble_predict(models=4)\n> isolation_forest:  0.23\n> elliptic_envelope: 0.18\n> one_class_svm:     0.31\n> autoencoder:       0.27\n> ensemble_score:    0.245\n> classification: NORMAL_`,
+    terminal: `> ensemble_predict(models=4)
+> isolation_forest:  0.23
+> elliptic_envelope: 0.18
+> one_class_svm:     0.31
+> autoencoder:       0.27
+> ensemble_score:    0.245
+> classification: NORMAL_`,
   },
 ];
 
@@ -148,21 +163,51 @@ const techStack = [
   },
 ];
 
+function RadarHero() {
+  return (
+    <div className="relative w-80 h-80 mx-auto mb-12">
+      {/* Concentric rings */}
+      <div className="radar-ring radar-ring-4" />
+      <div className="radar-ring radar-ring-3" />
+      <div className="radar-ring radar-ring-2" />
+      <div className="radar-ring radar-ring-1" />
+      
+      {/* Cross lines */}
+      <div className="absolute top-1/2 left-0 right-0 h-px bg-radar-ring" />
+      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-radar-ring" />
+      
+      {/* Sweep */}
+      <div className="radar-sweep" />
+      
+      {/* Center dot */}
+      <div className="radar-center" />
+      
+      {/* Random blips */}
+      <div className="radar-blip" style={{ top: '25%', left: '60%', animationDelay: '0s' }} />
+      <div className="radar-blip" style={{ top: '70%', left: '35%', animationDelay: '0.5s' }} />
+      <div className="radar-blip warning" style={{ top: '45%', left: '75%', animationDelay: '1s' }} />
+      <div className="radar-blip critical" style={{ top: '80%', left: '70%', animationDelay: '1.5s' }} />
+    </div>
+  );
+}
+
 export default function HomePage() {
   return (
     <main className="relative min-h-screen">
       <Navbar />
 
       {/* ===== HERO ===== */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 grid-bg">
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 dot-grid">
+        <RadarHero />
+        
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full border border-white/[0.08] bg-white/[0.03] text-xs text-zinc-400"
+            className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full border border-radar-green/20 bg-radar-greenDim text-xs text-radar-green"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-radar-green animate-pulse" />
             Real-Time ML Pipeline &middot; v2.0
           </motion.div>
 
@@ -172,11 +217,9 @@ export default function HomePage() {
             transition={{ duration: 0.7, delay: 0.1 }}
             className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
           >
-            <span className="gradient-text">Anomaly</span>
-            <br />
-            <span className="gradient-text-accent">Detection.</span>
+            <span className="radar-gradient-text">Sentinel</span>
           </motion.h1>
-
+          
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -196,7 +239,7 @@ export default function HomePage() {
           >
             <Link
               href="/dashboard"
-              className="group inline-flex items-center gap-2 px-6 py-3 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/25"
+              className="group inline-flex items-center gap-2 px-6 py-3 bg-radar-green/20 hover:bg-radar-green/30 text-radar-green border border-radar-green/30 hover:border-radar-green/50 text-sm font-medium rounded-lg transition-all"
             >
               Live Demo
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -219,7 +262,7 @@ export default function HomePage() {
         >
           {stats.map((stat, i) => (
             <div key={i} className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-white font-mono">
+              <div className="text-2xl md:text-3xl font-bold text-radar-green font-mono radar-glow">
                 {stat.value}
               </div>
               <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">
@@ -253,14 +296,14 @@ export default function HomePage() {
             <motion.p
               variants={fadeUp}
               custom={0}
-              className="text-xs text-indigo-400 uppercase tracking-widest mb-3"
+              className="text-xs text-radar-green uppercase tracking-widest mb-3"
             >
               Architecture
             </motion.p>
             <motion.h2
               variants={fadeUp}
               custom={1}
-              className="text-3xl md:text-4xl font-bold gradient-text mb-4"
+              className="text-3xl md:text-4xl font-bold radar-gradient-text mb-4"
             >
               How It Works
             </motion.h2>
@@ -290,10 +333,10 @@ export default function HomePage() {
                     custom={0}
                     className="flex items-center gap-3 mb-4"
                   >
-                    <span className="text-3xl font-mono font-bold text-white/10">
+                    <span className="text-3xl font-mono font-bold text-radar-green/10">
                       {step.num}
                     </span>
-                    <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider text-indigo-400 bg-indigo-500/10 rounded border border-indigo-500/20 font-mono">
+                    <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider text-radar-green bg-radar-greenDim rounded border border-radar-green/20 font-mono">
                       {step.tag}
                     </span>
                   </motion.div>
@@ -317,7 +360,7 @@ export default function HomePage() {
                         key={j}
                         className="flex items-center gap-2 text-sm text-zinc-500"
                       >
-                        <Sparkles className="w-3 h-3 text-indigo-400 flex-shrink-0" />
+                        <Crosshair className="w-3 h-3 text-radar-green flex-shrink-0" />
                         {check}
                       </li>
                     ))}
@@ -328,17 +371,17 @@ export default function HomePage() {
                 <motion.div
                   variants={fadeUp}
                   custom={2}
-                  className="glass rounded-xl overflow-hidden"
+                  className="radar-card rounded-xl overflow-hidden radar-border-glow"
                 >
-                  <div className="flex items-center gap-1.5 px-4 py-3 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-1.5 px-4 py-3 border-b border-radar-green/10">
                     <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
                     <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/60" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-radar-green/60" />
                     <span className="ml-2 text-[10px] text-zinc-600 font-mono">
                       pipeline_output
                     </span>
                   </div>
-                  <pre className="p-4 text-xs text-emerald-400/80 font-mono leading-relaxed whitespace-pre-wrap">
+                  <pre className="p-4 text-xs text-radar-green/80 font-mono leading-relaxed whitespace-pre-wrap">
                     {step.terminal}
                   </pre>
                 </motion.div>
@@ -349,7 +392,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== FEATURES ===== */}
-      <section id="features" className="py-32 px-6 border-t border-white/[0.04]">
+      <section id="features" className="py-32 px-6 border-t border-radar-green/10">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial="hidden"
@@ -360,14 +403,14 @@ export default function HomePage() {
             <motion.p
               variants={fadeUp}
               custom={0}
-              className="text-xs text-indigo-400 uppercase tracking-widest mb-3"
+              className="text-xs text-radar-green uppercase tracking-widest mb-3"
             >
               Features
             </motion.p>
             <motion.h2
               variants={fadeUp}
               custom={1}
-              className="text-3xl md:text-4xl font-bold gradient-text mb-4"
+              className="text-3xl md:text-4xl font-bold radar-gradient-text mb-4"
             >
               Engineered for Depth
             </motion.h2>
@@ -390,9 +433,9 @@ export default function HomePage() {
                 viewport={{ once: true, margin: "-50px" }}
                 variants={fadeUp}
                 custom={i}
-                className="glass glass-hover rounded-xl p-6 transition-all duration-300"
+                className="radar-card glass-hover rounded-xl p-6 transition-all duration-300"
               >
-                <feature.icon className="w-5 h-5 text-indigo-400 mb-4" />
+                <feature.icon className="w-5 h-5 text-radar-green mb-4" />
                 <h3 className="text-sm font-semibold text-white mb-2">
                   {feature.title}
                 </h3>
@@ -406,7 +449,7 @@ export default function HomePage() {
       </section>
 
       {/* ===== TECH STACK ===== */}
-      <section id="stack" className="py-32 px-6 border-t border-white/[0.04]">
+      <section id="stack" className="py-32 px-6 border-t border-radar-green/10">
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial="hidden"
@@ -417,14 +460,14 @@ export default function HomePage() {
             <motion.p
               variants={fadeUp}
               custom={0}
-              className="text-xs text-indigo-400 uppercase tracking-widest mb-3"
+              className="text-xs text-radar-green uppercase tracking-widest mb-3"
             >
               Stack
             </motion.p>
             <motion.h2
               variants={fadeUp}
               custom={1}
-              className="text-3xl md:text-4xl font-bold gradient-text mb-4"
+              className="text-3xl md:text-4xl font-bold radar-gradient-text mb-4"
             >
               Built With Modern Tools
             </motion.h2>
@@ -447,11 +490,11 @@ export default function HomePage() {
                 viewport={{ once: true, margin: "-50px" }}
                 variants={fadeUp}
                 custom={i}
-                className="glass glass-hover rounded-xl p-6 transition-all duration-300"
+                className="radar-card glass-hover rounded-xl p-6 transition-all duration-300"
               >
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
-                    <tech.icon className="w-5 h-5 text-indigo-400" />
+                  <div className="w-10 h-10 rounded-lg bg-radar-greenDim flex items-center justify-center border border-radar-green/20">
+                    <tech.icon className="w-5 h-5 text-radar-green" />
                   </div>
                   <div>
                     <p className="text-[10px] text-zinc-600 uppercase tracking-wider">
@@ -472,13 +515,13 @@ export default function HomePage() {
       </section>
 
       {/* ===== CTA ===== */}
-      <section className="py-32 px-6 border-t border-white/[0.04]">
+      <section className="py-32 px-6 border-t border-radar-green/10">
         <div className="max-w-3xl mx-auto text-center">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl md:text-4xl font-bold gradient-text mb-6"
+            className="text-3xl md:text-4xl font-bold radar-gradient-text mb-6"
           >
             Ready to see anomaly
             <br />
@@ -504,7 +547,7 @@ export default function HomePage() {
           >
             <Link
               href="/dashboard"
-              className="group inline-flex items-center gap-2 px-6 py-3 bg-indigo-500 hover:bg-indigo-400 text-white text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-indigo-500/25"
+              className="group inline-flex items-center gap-2 px-6 py-3 bg-radar-green/20 hover:bg-radar-green/30 text-radar-green border border-radar-green/30 hover:border-radar-green/50 text-sm font-medium rounded-lg transition-all"
             >
               Try It Now
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -523,11 +566,11 @@ export default function HomePage() {
       </section>
 
       {/* ===== FOOTER ===== */}
-      <footer className="border-t border-white/[0.04] py-12 px-6">
+      <footer className="border-t border-radar-green/10 py-12 px-6">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center">
-              <Activity className="w-3 h-3 text-white" />
+            <div className="w-6 h-6 rounded-md bg-radar-greenDim flex items-center justify-center border border-radar-green/30">
+              <Activity className="w-3 h-3 text-radar-green" />
             </div>
             <span className="text-sm font-medium text-zinc-400">sentinel</span>
           </div>

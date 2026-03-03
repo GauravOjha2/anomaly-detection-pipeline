@@ -28,6 +28,16 @@ const config: Config = {
           info: "#3b82f6",
           normal: "#10b981",
         },
+        radar: {
+          green: "#00ff88",
+          greenDim: "rgba(0, 255, 136, 0.15)",
+          greenGlow: "rgba(0, 255, 136, 0.4)",
+          cyan: "#00d4ff",
+          cyanDim: "rgba(0, 212, 255, 0.15)",
+          background: "#0a0f0a",
+          grid: "rgba(0, 255, 136, 0.05)",
+          ring: "rgba(0, 255, 136, 0.1)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
@@ -39,6 +49,10 @@ const config: Config = {
         "pulse-slow": "pulse 3s ease-in-out infinite",
         "glow": "glow 2s ease-in-out infinite alternate",
         "scan-line": "scanLine 3s linear infinite",
+        "radar-sweep": "radarSweep 4s linear infinite",
+        "radar-ping": "radarPing 2s ease-out infinite",
+        "radar-ripple": "radarRipple 2s ease-out infinite",
+        "blink": "blink 1s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
@@ -56,6 +70,22 @@ const config: Config = {
         scanLine: {
           "0%": { transform: "translateY(-100%)" },
           "100%": { transform: "translateY(100%)" },
+        },
+        radarSweep: {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        radarPing: {
+          "0%": { transform: "scale(0)", opacity: "1" },
+          "100%": { transform: "scale(2)", opacity: "0" },
+        },
+        radarRipple: {
+          "0%": { transform: "scale(0.8)", opacity: "1" },
+          "100%": { transform: "scale(1.5)", opacity: "0" },
+        },
+        blink: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.3" },
         },
       },
       backdropBlur: {
