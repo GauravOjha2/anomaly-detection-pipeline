@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   Brain,
   ChevronDown,
-  ChevronUp,
   Database,
   Gauge,
   GitBranch,
@@ -22,6 +21,9 @@ import {
   Globe,
   TrendingUp,
   BarChart3,
+  BookOpen,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
@@ -211,6 +213,62 @@ const faqs = [
   },
 ];
 
+const apiEndpoints = [
+  {
+    method: "POST",
+    path: "/api/detect",
+    description: "Run anomaly detection on telemetry data",
+    params: [
+      { name: "scenario", type: "string", optional: true, description: "Predefined scenario name (mixed, normal, emergency, etc.)" },
+      { name: "telemetry", type: "array", optional: true, description: "Array of telemetry events (max 100)" },
+    ],
+    example: `curl -X POST https://sentinel.vercel.app/api/detect \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "scenario": "mixed",
+    "count": 30
+  }'`,
+  },
+  {
+    method: "GET",
+    path: "/api/detect",
+    description: "Get API status and available scenarios",
+    params: [],
+    example: `curl https://sentinel.vercel.app/api/detect`,
+  },
+];
+
+const modelDetails = [
+  {
+    name: "Isolation Forest",
+    abbreviation: "IF",
+    description: "Tree-based model that isolates anomalies by random partitioning. Works by measuring the average path length required to isolate a data point.",
+    strength: "Fast, handles high-dimensional data well",
+    weight: "25%",
+  },
+  {
+    name: "Elliptic Envelope",
+    abbreviation: "EE",
+    description: "Assumes data is Gaussian distributed and fits an ellipse around normal observations using Mahalanobis distance.",
+    strength: "Good for normally distributed data",
+    weight: "25%",
+  },
+  {
+    name: "One-Class SVM",
+    abbreviation: "SVM",
+    description: "Kernel-based method that learns a decision boundary around normal data points using RBF kernel.",
+    strength: "Captures complex non-linear boundaries",
+    weight: "25%",
+  },
+  {
+    name: "Autoencoder",
+    abbreviation: "AE",
+    description: "Neural network that learns to reconstruct normal data. High reconstruction error indicates anomalies.",
+    strength: "Captures complex patterns, good for temporal data",
+    weight: "25%",
+  },
+];
+
 function FloatingParticles() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -274,21 +332,120 @@ function FAQItem({ question, answer, index }: { question: string; answer: string
       >
         <span className="text-sm font-medium text-white pr-4">{question}</span>
         {open ? (
-          <ChevronUp className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+          <ChevronDown className="w-4 h-4 text-zinc-500 flex-shrink-0 rotate-180 transition-transform" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+          <ChevronDown className="w-4 h-4 text-zinc-500 flex-shrink-0 transition-transform" />
         )}
       </button>
-      {open && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          className="px-6 pb-4"
-        >
-          <p className="text-sm text-zinc-400 leading-relaxed">{answer}</p>
-        </motion.div>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="px-6 pb-4"
+          >
+            <p className="text-sm text-zinc-400 leading-relaxed">{answer}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function ApiEndpointCard({ endpoint, index }: { endpoint: typeof apiEndpoints[0]; index: number }) {
+  const [copied, setCopied] = useState(false);
+
+  const copyCode = () => {
+    navigator.clipboard.writeText(endpoint.example);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const methodColors: Record<string, string> = {
+    POST: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+    GET: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    PUT: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    DELETE: "bg-red-500/20 text-red-400 border-red-500/30",
+  };
+
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={fadeUp}
+      custom={index}
+      className="radar-card rounded-xl overflow-hidden"
+    >
+      <div className="px-6 py-4 border-b border-radar-green/10">
+        <div className="flex items-center gap-3">
+          <span className={`px-2 py-0.5 text-xs font-mono font-medium rounded border ${methodColors[endpoint.method]}`}>
+            {endpoint.method}
+          </span>
+          <code className="text-sm text-zinc-300 font-mono">{endpoint.path}</code>
+        </div>
+        <p className="text-xs text-zinc-500 mt-2">{endpoint.description}</p>
+      </div>
+      
+      {endpoint.params.length > 0 && (
+        <div className="px-6 py-4 border-b border-radar-green/10">
+          <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">Parameters</p>
+          <div className="space-y-2">
+            {endpoint.params.map((param, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs">
+                <code className="text-radar-green font-mono">{param.name}</code>
+                <span className="text-zinc-600">:</span>
+                <span className="text-zinc-400 font-mono">{param.type}</span>
+                {param.optional && <span className="text-zinc-600">(optional)</span>}
+                <span className="text-zinc-500">- {param.description}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
+
+      <div className="px-6 py-4">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-xs text-zinc-500 uppercase tracking-wider">Example</p>
+          <button
+            onClick={copyCode}
+            className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+            {copied ? "Copied!" : "Copy"}
+          </button>
+        </div>
+        <pre className="text-xs text-zinc-400 font-mono bg-black/20 rounded-lg p-3 overflow-x-auto">
+          {endpoint.example}
+        </pre>
+      </div>
+    </motion.div>
+  );
+}
+
+function ModelCard({ model, index }: { model: typeof modelDetails[0]; index: number }) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={fadeUp}
+      custom={index}
+      className="radar-card rounded-xl p-5"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-bold text-radar-green font-mono">{model.abbreviation}</span>
+          <span className="text-sm font-medium text-white">{model.name}</span>
+        </div>
+        <span className="text-xs text-zinc-500 font-mono">Weight: {model.weight}</span>
+      </div>
+      <p className="text-xs text-zinc-400 leading-relaxed mb-3">{model.description}</p>
+      <div className="flex items-center gap-2 text-xs text-zinc-500">
+        <Zap className="w-3 h-3 text-radar-green" />
+        <span>{model.strength}</span>
+      </div>
     </motion.div>
   );
 }
@@ -349,10 +506,11 @@ export default function HomePage() {
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
-              href="#how-it-works"
+              href="#docs"
               className="inline-flex items-center gap-2 px-6 py-3 text-zinc-400 hover:text-white text-sm font-medium rounded-lg border border-white/[0.08] hover:border-white/[0.15] hover:bg-white/[0.03] transition-all"
             >
-              How It Works
+              <BookOpen className="w-4 h-4" />
+              API Docs
             </Link>
           </motion.div>
         </div>
@@ -497,6 +655,88 @@ export default function HomePage() {
                   </pre>
                 </motion.div>
               </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== MODELS SECTION ===== */}
+      <section id="models" className="py-32 px-6 border-t border-radar-green/10">
+        <div className="max-w-5xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="mb-16"
+          >
+            <motion.p
+              variants={fadeUp}
+              custom={0}
+              className="text-xs text-radar-green uppercase tracking-widest mb-3"
+            >
+              Ensemble Models
+            </motion.p>
+            <motion.h2
+              variants={fadeUp}
+              custom={1}
+              className="text-3xl md:text-4xl font-bold radar-gradient-text mb-4"
+            >
+              Four Complementary Models
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              custom={2}
+              className="text-zinc-400 max-w-xl"
+            >
+              Each model captures different anomaly patterns. Combined together,
+              they achieve higher accuracy than any single model alone.
+            </motion.p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {modelDetails.map((model, i) => (
+              <ModelCard key={i} model={model} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== API DOCS ===== */}
+      <section id="docs" className="py-32 px-6 border-t border-radar-green/10">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="mb-16"
+          >
+            <motion.p
+              variants={fadeUp}
+              custom={0}
+              className="text-xs text-radar-green uppercase tracking-widest mb-3"
+            >
+              API Reference
+            </motion.p>
+            <motion.h2
+              variants={fadeUp}
+              custom={1}
+              className="text-3xl md:text-4xl font-bold radar-gradient-text mb-4"
+            >
+              Developer Documentation
+            </motion.h2>
+            <motion.p
+              variants={fadeUp}
+              custom={2}
+              className="text-zinc-400 max-w-xl"
+            >
+              Integrate Sentinel&apos;s anomaly detection into your own applications
+              using our REST API.
+            </motion.p>
+          </motion.div>
+
+          <div className="space-y-6">
+            {apiEndpoints.map((endpoint, i) => (
+              <ApiEndpointCard key={i} endpoint={endpoint} index={i} />
             ))}
           </div>
         </div>
