@@ -163,30 +163,32 @@ const techStack = [
   },
 ];
 
-function RadarHero() {
+function RadarBackground() {
   return (
-    <div className="relative w-80 h-80 mx-auto mb-12">
-      {/* Concentric rings */}
-      <div className="radar-ring radar-ring-4" />
-      <div className="radar-ring radar-ring-3" />
-      <div className="radar-ring radar-ring-2" />
-      <div className="radar-ring radar-ring-1" />
-      
-      {/* Cross lines */}
-      <div className="absolute top-1/2 left-0 right-0 h-px bg-radar-ring" />
-      <div className="absolute left-1/2 top-0 bottom-0 w-px bg-radar-ring" />
-      
-      {/* Sweep */}
-      <div className="radar-sweep" />
-      
-      {/* Center dot */}
-      <div className="radar-center" />
-      
-      {/* Random blips */}
-      <div className="radar-blip" style={{ top: '25%', left: '60%', animationDelay: '0s' }} />
-      <div className="radar-blip" style={{ top: '70%', left: '35%', animationDelay: '0.5s' }} />
-      <div className="radar-blip warning" style={{ top: '45%', left: '75%', animationDelay: '1s' }} />
-      <div className="radar-blip critical" style={{ top: '80%', left: '70%', animationDelay: '1.5s' }} />
+    <div className="fixed inset-0 flex items-center justify-center pointer-events-none -z-10 overflow-hidden">
+      <div className="relative w-[600px] h-[600px] opacity-30">
+        {/* Concentric rings */}
+        <div className="radar-ring radar-ring-4" />
+        <div className="radar-ring radar-ring-3" />
+        <div className="radar-ring radar-ring-2" />
+        <div className="radar-ring radar-ring-1" />
+        
+        {/* Cross lines */}
+        <div className="absolute top-1/2 left-0 right-0 h-px bg-radar-ring" />
+        <div className="absolute left-1/2 top-0 bottom-0 w-px bg-radar-ring" />
+        
+        {/* Sweep */}
+        <div className="radar-sweep" />
+        
+        {/* Center dot */}
+        <div className="radar-center" />
+        
+        {/* Random blips */}
+        <div className="radar-blip" style={{ top: '25%', left: '60%', animationDelay: '0s' }} />
+        <div className="radar-blip" style={{ top: '70%', left: '35%', animationDelay: '0.5s' }} />
+        <div className="radar-blip warning" style={{ top: '45%', left: '75%', animationDelay: '1s' }} />
+        <div className="radar-blip critical" style={{ top: '80%', left: '70%', animationDelay: '1.5s' }} />
+      </div>
     </div>
   );
 }
@@ -198,7 +200,7 @@ export default function HomePage() {
 
       {/* ===== HERO ===== */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 dot-grid">
-        <RadarHero />
+        <RadarBackground />
         
         <div className="max-w-4xl mx-auto text-center">
           <motion.div

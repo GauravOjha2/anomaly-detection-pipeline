@@ -136,19 +136,19 @@ body {
 }
 
 .radar-grid-bg {
-  background-color: #0a0f0a;
+  background-color: #0a0a1a;
   background-image: 
-    radial-gradient(circle, rgba(0, 255, 136, 0.03) 1px, transparent 1px),
-    radial-gradient(circle, rgba(0, 255, 136, 0.02) 1px, transparent 1px),
-    linear-gradient(rgba(0, 255, 136, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 136, 0.02) 1px, transparent 1px);
+    radial-gradient(circle, rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+    radial-gradient(circle, rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.02) 1px, transparent 1px);
   background-size: 100px 100px, 200px 200px, 50px 50px, 50px 50px;
   background-position: 0 0, 0 0, 25px 25px, 25px 25px;
 }
 
 .radar-ring {
   position: absolute;
-  border: 1px solid rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.1);
   border-radius: 50%;
   top: 50%;
   left: 50%;
@@ -164,33 +164,33 @@ body {
   position: absolute;
   width: 50%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.8), rgba(0, 255, 136, 0.3));
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.8), rgba(0, 212, 255, 0.3));
   top: 50%;
   left: 50%;
   transform-origin: left center;
   animation: radarSweep 4s linear infinite;
-  box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
 }
 
 .radar-center {
   position: absolute;
   width: 12px;
   height: 12px;
-  background: #00ff88;
+  background: #00d4ff;
   border-radius: 50%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 15px #00ff88, 0 0 30px rgba(0, 255, 136, 0.5);
+  box-shadow: 0 0 15px #00d4ff, 0 0 30px rgba(0, 212, 255, 0.5);
 }
 
 .radar-blip {
   position: absolute;
   width: 8px;
   height: 8px;
-  background: #00ff88;
+  background: #00d4ff;
   border-radius: 50%;
-  box-shadow: 0 0 10px #00ff88, 0 0 20px rgba(0, 255, 136, 0.5);
+  box-shadow: 0 0 10px #00d4ff, 0 0 20px rgba(0, 212, 255, 0.5);
   animation: blink 1.5s ease-in-out infinite;
 }
 
@@ -208,7 +208,7 @@ body {
   position: absolute;
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(0, 255, 136, 0.5);
+  border: 2px solid rgba(0, 212, 255, 0.5);
   border-radius: 50%;
   animation: radarPing 2s ease-out infinite;
 }
@@ -218,9 +218,9 @@ body {
 }
 
 .radar-card {
-  background: rgba(0, 20, 10, 0.6);
+  background: rgba(0, 10, 30, 0.6);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 255, 136, 0.15);
+  border: 1px solid rgba(0, 212, 255, 0.15);
   position: relative;
   overflow: hidden;
 }
@@ -232,22 +232,22 @@ body {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5), transparent);
 }
 
 .radar-card:hover {
-  border-color: rgba(0, 255, 136, 0.3);
-  box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+  border-color: rgba(0, 212, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
 }
 
 .radar-glow {
-  text-shadow: 0 0 10px rgba(0, 255, 136, 0.5), 0 0 20px rgba(0, 255, 136, 0.3);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.3);
 }
 
 .radar-border-glow {
   box-shadow: 
-    0 0 1px rgba(0, 255, 136, 0.3),
-    inset 0 0 20px rgba(0, 255, 136, 0.05);
+    0 0 1px rgba(0, 212, 255, 0.3),
+    inset 0 0 20px rgba(0, 212, 255, 0.05);
 }
 
 .scan-line {
@@ -256,7 +256,7 @@ body {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.3), transparent);
   animation: scanLine 3s linear infinite;
 }
 
@@ -276,7 +276,7 @@ body {
 }
 
 .radar-gradient-text {
-  background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #00ff88 100%);
+  background: linear-gradient(135deg, #00d4ff 0%, #00d4ff 50%, #00d4ff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -290,6 +290,6 @@ body {
 }
 
 .dot-grid {
-  background-image: radial-gradient(rgba(0, 255, 136, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(0, 212, 255, 0.15) 1px, transparent 1px);
   background-size: 20px 20px;
 }
