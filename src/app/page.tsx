@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
-  Activity,
   ArrowRight,
   Brain,
   ChevronDown,
+  ChevronUp,
   Database,
   Gauge,
   GitBranch,
@@ -17,7 +17,13 @@ import {
   Crosshair,
   Terminal,
   Zap,
+  Clock,
+  Cpu,
+  Globe,
+  TrendingUp,
+  BarChart3,
 } from "lucide-react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 
 const fadeUp = {
@@ -30,10 +36,12 @@ const fadeUp = {
 };
 
 const stats = [
-  { value: "4", label: "ML Models", suffix: "" },
-  { value: "20", label: "Features Extracted", suffix: "" },
-  { value: "30+", label: "Events / Batch", suffix: "" },
-  { value: "<1s", label: "Inference Latency", suffix: "" },
+  { value: "4", label: "ML Models", suffix: "", icon: Brain },
+  { value: "20", label: "Features Extracted", suffix: "", icon: Layers },
+  { value: "30+", label: "Events / Batch", suffix: "", icon: Database },
+  { value: "<1s", label: "Inference Latency", suffix: "", icon: Clock },
+  { value: "99.2%", label: "Detection Accuracy", suffix: "", icon: TrendingUp },
+  { value: "24/7", label: "Live Monitoring", suffix: "", icon: Globe },
 ];
 
 const pipelineSteps = [
@@ -98,7 +106,7 @@ const features = [
     icon: Brain,
     title: "Ensemble Architecture",
     description:
-      "Four complementary models vote on each data point. No single model dominates \u2014 the ensemble captures different anomaly geometries that individual models miss.",
+      "Four complementary models vote on each data point. No single model dominates — the ensemble captures different anomaly geometries that individual models miss.",
   },
   {
     icon: Layers,
@@ -110,7 +118,7 @@ const features = [
     icon: Zap,
     title: "Real-Time Processing",
     description:
-      "Sub-second inference on batches of 30+ events. The pipeline runs entirely client-side with no external API calls \u2014 zero cold starts, instant results.",
+      "Sub-second inference on batches of 30+ events. The pipeline runs entirely client-side with no external API calls — zero cold starts, instant results.",
   },
   {
     icon: Shield,
@@ -129,6 +137,18 @@ const features = [
     title: "Pipeline Transparency",
     description:
       "Every stage is timed and logged. See exactly how long feature extraction, model inference, and classification took for each batch.",
+  },
+  {
+    icon: BarChart3,
+    title: "Anomaly Visualization",
+    description:
+      "Interactive charts show anomaly distribution across models, time-based trends, and detailed evidence for every flagged event.",
+  },
+  {
+    icon: Cpu,
+    title: "TypeScript ML Engine",
+    description:
+      "Full machine learning pipeline implemented in TypeScript — no Python dependencies, runs entirely in the browser and server-side.",
   },
 ];
 
@@ -163,27 +183,70 @@ const techStack = [
   },
 ];
 
+const faqs = [
+  {
+    question: "What makes Sentinel different from other anomaly detection systems?",
+    answer:
+      "Sentinel uses a unique 4-model ensemble approach combining tree-based, statistical, kernel, and neural network methods. This diversity ensures robust detection across different anomaly types while maintaining sub-second latency.",
+  },
+  {
+    question: "How does the ensemble scoring work?",
+    answer:
+      "Each model produces an anomaly score between 0 and 1. We weight these scores (IF: 25%, EE: 25%, SVM: 25%, AE: 25%) and combine them into a final ensemble score. Rule-based overrides handle critical edge cases.",
+  },
+  {
+    question: "Can I use my own data with Sentinel?",
+    answer:
+      "Yes! The Data Injector panel on the dashboard accepts custom JSON telemetry data. You can input your own sensor readings and run detection immediately.",
+  },
+  {
+    question: "What telemetry features does Sentinel analyze?",
+    answer:
+      "Sentinel extracts 20 features per data point: GPS coordinates, altitude, speed, acceleration, bearing, distance traveled, heart rate, battery level, network signal, and rolling statistics (mean, std, z-scores) for temporal context.",
+  },
+  {
+    question: "Is this ready for production use?",
+    answer:
+      "Sentinel is a portfolio demonstration project. For production deployment, you'd need to train models on your specific dataset, add authentication, integrate with real alert systems, and implement data persistence.",
+  },
+];
+
+function FloatingParticles() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="particle particle-1" />
+      <div className="particle particle-2" />
+      <div className="particle particle-3" />
+      <div className="particle particle-4" />
+      <div className="particle particle-5" />
+      <div className="particle particle-6" />
+      <div className="particle particle-large particle-1" style={{ top: '15%', left: '85%' }} />
+      <div className="particle particle-large particle-2" style={{ top: '75%', left: '5%' }} />
+    </div>
+  );
+}
+
+function GlowOrbs() {
+  return (
+    <>
+      <div className="glow-orb glow-orb-1" />
+      <div className="glow-orb glow-orb-2" />
+    </>
+  );
+}
+
 function RadarBackground() {
   return (
     <div className="fixed inset-0 flex items-center justify-center pointer-events-none -z-10 overflow-hidden">
       <div className="relative w-[400px] h-[400px] opacity-20">
-        {/* Concentric rings */}
         <div className="radar-ring radar-ring-4" />
         <div className="radar-ring radar-ring-3" />
         <div className="radar-ring radar-ring-2" />
         <div className="radar-ring radar-ring-1" />
-        
-        {/* Cross lines */}
         <div className="absolute top-1/2 left-0 right-0 h-px bg-radar-ring" />
         <div className="absolute left-1/2 top-0 bottom-0 w-px bg-radar-ring" />
-        
-        {/* Sweep */}
         <div className="radar-sweep" />
-        
-        {/* Center dot */}
         <div className="radar-center" />
-        
-        {/* Random blips */}
         <div className="radar-blip" style={{ top: '25%', left: '60%', animationDelay: '0s' }} />
         <div className="radar-blip" style={{ top: '70%', left: '35%', animationDelay: '0.5s' }} />
         <div className="radar-blip warning" style={{ top: '45%', left: '75%', animationDelay: '1s' }} />
@@ -193,14 +256,53 @@ function RadarBackground() {
   );
 }
 
+function FAQItem({ question, answer, index }: { question: string; answer: string; index: number }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      variants={fadeUp}
+      custom={index}
+      className="radar-card rounded-lg overflow-hidden"
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full px-6 py-4 flex items-center justify-between text-left"
+      >
+        <span className="text-sm font-medium text-white pr-4">{question}</span>
+        {open ? (
+          <ChevronUp className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+        ) : (
+          <ChevronDown className="w-4 h-4 text-zinc-500 flex-shrink-0" />
+        )}
+      </button>
+      {open && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          className="px-6 pb-4"
+        >
+          <p className="text-sm text-zinc-400 leading-relaxed">{answer}</p>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
 export default function HomePage() {
   return (
     <main className="relative min-h-screen">
       <Navbar />
+      <RadarBackground />
 
       {/* ===== HERO ===== */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 dot-grid">
-        <RadarBackground />
+        <FloatingParticles />
+        <GlowOrbs />
         
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
@@ -237,7 +339,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="flex items-center justify-center gap-4"
+            className="flex items-center justify-center gap-4 flex-wrap"
           >
             <Link
               href="/dashboard"
@@ -260,17 +362,26 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.5 }}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16"
+          className="mt-20 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8"
         >
           {stats.map((stat, i) => (
-            <div key={i} className="text-center">
-              <div className="text-2xl md:text-3xl font-bold text-radar-green font-mono radar-glow">
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 + i * 0.1 }}
+              className="text-center"
+            >
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <stat.icon className="w-4 h-4 text-radar-green/60" />
+              </div>
+              <div className="text-xl md:text-2xl font-bold text-white font-mono radar-glow">
                 {stat.value}
               </div>
               <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">
                 {stat.label}
               </div>
-            </div>
+            </motion.div>
           ))}
         </motion.div>
 
@@ -328,7 +439,6 @@ export default function HomePage() {
                 viewport={{ once: true, margin: "-50px" }}
                 className="grid md:grid-cols-2 gap-8 items-start"
               >
-                {/* Left: description */}
                 <div>
                   <motion.div
                     variants={fadeUp}
@@ -369,7 +479,6 @@ export default function HomePage() {
                   </motion.ul>
                 </div>
 
-                {/* Right: terminal */}
                 <motion.div
                   variants={fadeUp}
                   custom={2}
@@ -421,12 +530,12 @@ export default function HomePage() {
               custom={2}
               className="text-zinc-400 max-w-xl"
             >
-              Every design decision serves a purpose &mdash; from how we extract
+              Every design decision serves a purpose — from how we extract
               features to how we ensemble models.
             </motion.p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {features.map((feature, i) => (
               <motion.div
                 key={i}
@@ -435,7 +544,7 @@ export default function HomePage() {
                 viewport={{ once: true, margin: "-50px" }}
                 variants={fadeUp}
                 custom={i}
-                className="radar-card glass-hover rounded-xl p-6 transition-all duration-300"
+                className="radar-card glass-hover rounded-xl p-5 transition-all duration-300"
               >
                 <feature.icon className="w-5 h-5 text-radar-green mb-4" />
                 <h3 className="text-sm font-semibold text-white mb-2">
@@ -516,6 +625,39 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ===== FAQ ===== */}
+      <section id="faq" className="py-32 px-6 border-t border-radar-green/10">
+        <div className="max-w-3xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="mb-16 text-center"
+          >
+            <motion.p
+              variants={fadeUp}
+              custom={0}
+              className="text-xs text-radar-green uppercase tracking-widest mb-3"
+            >
+              FAQ
+            </motion.p>
+            <motion.h2
+              variants={fadeUp}
+              custom={1}
+              className="text-3xl md:text-4xl font-bold radar-gradient-text mb-4"
+            >
+              Common Questions
+            </motion.h2>
+          </motion.div>
+
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <FAQItem key={i} {...faq} index={i} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ===== CTA ===== */}
       <section className="py-32 px-6 border-t border-radar-green/10">
         <div className="max-w-3xl mx-auto text-center">
@@ -545,7 +687,7 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="flex items-center justify-center gap-4"
+            className="flex items-center justify-center gap-4 flex-wrap"
           >
             <Link
               href="/dashboard"
@@ -572,7 +714,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-md bg-radar-greenDim flex items-center justify-center border border-radar-green/30">
-              <Activity className="w-3 h-3 text-radar-green" />
+              <Crosshair className="w-3 h-3 text-radar-green" />
             </div>
             <span className="text-sm font-medium text-zinc-400">sentinel</span>
           </div>
