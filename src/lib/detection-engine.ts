@@ -399,7 +399,7 @@ function computeEnsembleScore(features: FeatureVector): ModelScores {
   };
 }
 
-function classifyAnomaly(event: TelemetryEvent, features: FeatureVector, scores: ModelScores): {
+function classifyAnomaly(event: TelemetryEvent, features: FeatureVector, scores: ModelScores, threshold: number = ANOMALY_THRESHOLD): {
   type: AnomalyType;
   level: AlertLevel;
 } {
@@ -415,8 +415,8 @@ function classifyAnomaly(event: TelemetryEvent, features: FeatureVector, scores:
   if (features.velocity_kmh < 0.1 && features.time_diff_s > 1800) return { type: 'PROLONGED_INACTIVITY', level: 'INFO' };
 
   // ML-based classification
-  if (scores.ensemble > 0.7) return { type: 'ROUTE_DEVIATION', level: 'CRITICAL' };
-  if (scores.ensemble > ANOMALY_THRESHOLD) return { type: 'ROUTE_DEVIATION', level: 'WARNING' };
+  if (scores.ensemble > Math.max(0.7, threshold + 0.25)) return { type: 'ROUTE_DEVIATION', level: 'CRITICAL' };
+  if (scores.ensemble > threshold) return { type: 'ROUTE_DEVIATION', level: 'WARNING' };
 
   return { type: 'NORMAL', level: 'NORMAL' };
 }
@@ -429,7 +429,8 @@ function generateId(): string {
   return 'alert_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
 }
 
-export async function runDetectionPipeline(events: TelemetryEvent[]): Promise<DetectionResult> {
+export async function runDetectionPipeline(events: TelemetryEvent[], threshold?: number): Promise<DetectionResult> {
+  const anomalyThreshold = threshold ?? ANOMALY_THRESHOLD;
   const startTime = performance.now();
   const stages: PipelineStage[] = [];
 
@@ -472,7 +473,7 @@ export async function runDetectionPipeline(events: TelemetryEvent[]): Promise<De
     const scores = allScores[i];
     const features = featureVectors[i];
     const event = events[i];
-    const { type, level } = classifyAnomaly(event, features, scores);
+    const { type, level } = classifyAnomaly(event, features, scores, anomalyThreshold);
 
     if (type !== 'NORMAL') {
       alerts.push({
@@ -529,6 +530,7 @@ export async function runDetectionPipeline(events: TelemetryEvent[]): Promise<De
     telemetry_processed: events.length,
     processing_time_ms: totalTime,
     pipeline_stages: stages,
+    threshold_used: anomalyThreshold,
   };
 }
 

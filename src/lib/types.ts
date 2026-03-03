@@ -48,6 +48,7 @@ export interface DetectionResult {
   telemetry_processed: number;
   processing_time_ms: number;
   pipeline_stages: PipelineStage[];
+  threshold_used?: number;
 }
 
 export interface PipelineStage {

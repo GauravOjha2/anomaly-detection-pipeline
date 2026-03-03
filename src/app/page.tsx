@@ -194,7 +194,7 @@ const faqs = [
   {
     question: "How does the ensemble scoring work?",
     answer:
-      "Each model produces an anomaly score between 0 and 1. We weight these scores (IF: 25%, EE: 25%, SVM: 25%, AE: 25%) and combine them into a final ensemble score. Rule-based overrides handle critical edge cases.",
+      "Each model produces an anomaly score between 0 and 1. We weight these scores (IF: 30%, EE: 25%, SVM: 20%, AE: 25%) and combine them into a final ensemble score. Isolation Forest gets the highest weight due to its robustness. Rule-based overrides handle critical edge cases.",
   },
   {
     question: "Can I use my own data with Sentinel?",
@@ -244,7 +244,7 @@ const modelDetails = [
     abbreviation: "IF",
     description: "Tree-based model that isolates anomalies by random partitioning. Works by measuring the average path length required to isolate a data point.",
     strength: "Fast, handles high-dimensional data well",
-    weight: "25%",
+    weight: "30%",
   },
   {
     name: "Elliptic Envelope",
@@ -258,7 +258,7 @@ const modelDetails = [
     abbreviation: "SVM",
     description: "Kernel-based method that learns a decision boundary around normal data points using RBF kernel.",
     strength: "Captures complex non-linear boundaries",
-    weight: "25%",
+    weight: "20%",
   },
   {
     name: "Autoencoder",

@@ -7,8 +7,9 @@ import { Menu, X, Crosshair } from "lucide-react";
 
 const navLinks = [
   { href: "#how-it-works", label: "How It Works" },
+  { href: "#models", label: "Models" },
+  { href: "#docs", label: "API Docs" },
   { href: "#features", label: "Features" },
-  { href: "#stack", label: "Stack" },
   { href: "/dashboard", label: "Live Demo" },
 ];
 
@@ -29,7 +30,7 @@ export default function Navbar() {
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-[#0a0f0a]/80 backdrop-blur-xl border-b border-radar-green/10"
+           ? "bg-[#09090b]/80 backdrop-blur-xl border-b border-radar-green/10"
           : "bg-transparent"
       }`}
     >
@@ -77,7 +78,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[#0a0f0a]/95 backdrop-blur-xl border-b border-radar-green/10"
+            className="md:hidden bg-[#09090b]/95 backdrop-blur-xl border-b border-radar-green/10"
           >
             <div className="px-6 py-4 flex flex-col gap-2">
               {navLinks.map((link) => (
