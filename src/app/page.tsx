@@ -39,29 +39,29 @@ const fadeUp = {
 
 const stats = [
   { value: "4", label: "ML Models", suffix: "", icon: Brain },
-  { value: "20", label: "Features Extracted", suffix: "", icon: Layers },
-  { value: "30+", label: "Events / Batch", suffix: "", icon: Database },
+  { value: "16", label: "Features Extracted", suffix: "", icon: Layers },
+  { value: "50+", label: "Species / Batch", suffix: "", icon: Database },
   { value: "<1s", label: "Inference Latency", suffix: "", icon: Clock },
-  { value: "99.2%", label: "Detection Accuracy", suffix: "", icon: TrendingUp },
-  { value: "24/7", label: "Live Monitoring", suffix: "", icon: Globe },
+  { value: "8", label: "Anomaly Categories", suffix: "", icon: TrendingUp },
+  { value: "Live", label: "iNaturalist Data", suffix: "", icon: Globe },
 ];
 
 const pipelineSteps = [
   {
     num: "01",
     tag: "input",
-    title: "Telemetry Ingestion",
+    title: "Data Ingestion",
     description:
-      "IoT sensor data streams in from GPS devices carried by tourists. Each event contains coordinates, heart rate, battery level, network status, and panic button state. Data is validated and normalized for the pipeline.",
+      "Real-time observations stream in from the iNaturalist API — the world's largest citizen science biodiversity platform. Each sighting includes species identification, GPS coordinates, timestamps, conservation status, and observation photos. Data is validated and normalized for the pipeline.",
     checks: [
-      "GPS coordinates + altitude",
-      "Heart rate + battery monitoring",
-      "Panic button + network status",
+      "Species ID + IUCN conservation status",
+      "GPS coordinates + positional accuracy",
+      "Observation photos + quality grade",
     ],
-    terminal: `> ingest_telemetry(batch_size=30)
-> validating schema... OK
-> 30 events received
-> normalizing coordinates...
+    terminal: `> fetch_sightings(source="iNaturalist")
+> filtering threatened species... OK
+> 30 observations received
+> mapping conservation status...
 > ready for feature extraction_`,
   },
   {
@@ -69,25 +69,25 @@ const pipelineSteps = [
     tag: "processing",
     title: "Feature Engineering",
     description:
-      "Raw telemetry is transformed into a 20-dimensional feature vector per data point. Features include haversine distances, instantaneous velocity, acceleration, bearing changes, rolling statistics, z-scores, temporal patterns, and movement efficiency metrics.",
+      "Raw sightings are transformed into a 16-dimensional feature vector per observation. Features include spatial isolation metrics, species range deviation scores, temporal patterns, IUCN rarity indices, geographic clustering density, and data quality signals — all computed relative to the batch distribution.",
     checks: [
-      "Haversine distance + velocity",
-      "Rolling mean/std (window=5)",
-      "Z-score outlier detection",
+      "Haversine distance + spatial density",
+      "Range deviation + peer isolation",
+      "IUCN rarity + quality scoring",
     ],
-    terminal: `> extract_features(n=20)
-> computing haversine distances...
-> velocity: 4.2 km/h (normal)
-> bearing_change: 12.3 deg
-> z_score: 0.3 (within bounds)
-> 20-dim vector ready_`,
+    terminal: `> extract_features(n=16)
+> computing spatial isolation...
+> range_deviation: 0.12 (in range)
+> iucn_rarity: 0.80 (endangered)
+> species_frequency: 0.33
+> 16-dim vector ready_`,
   },
   {
     num: "03",
     tag: "inference",
     title: "Ensemble ML Detection",
     description:
-      "Feature vectors are passed through a 4-model ensemble: Isolation Forest for tree-based outlier isolation, Elliptic Envelope for Mahalanobis distance, One-Class SVM with RBF kernel for boundary detection, and an Autoencoder for reconstruction-error-based anomaly scoring.",
+      "Feature vectors pass through a 4-model ensemble: Isolation Forest for outlier isolation, Elliptic Envelope for Mahalanobis distance, One-Class SVM with RBF kernel for boundary detection, and an Autoencoder for reconstruction-error scoring. Weighted ensemble produces a final anomaly score per sighting.",
     checks: [
       "Weighted ensemble (IF + EE + SVM + AE)",
       "Confidence scoring per model",
@@ -108,49 +108,49 @@ const features = [
     icon: Brain,
     title: "Ensemble Architecture",
     description:
-      "Four complementary models vote on each data point. No single model dominates — the ensemble captures different anomaly geometries that individual models miss.",
+      "Four complementary models vote on each sighting. No single model dominates — the ensemble captures different anomaly geometries that individual models miss.",
   },
   {
     icon: Layers,
-    title: "20-Feature Pipeline",
+    title: "16-Feature Pipeline",
     description:
-      "Every telemetry event produces a rich feature vector: spatial, temporal, kinematic, and physiological dimensions. Rolling statistics and z-scores add context.",
+      "Every sighting produces a rich feature vector: spatial isolation, range deviation, species rarity, temporal patterns, geographic density, and data quality signals.",
   },
   {
-    icon: Zap,
-    title: "Real-Time Processing",
+    icon: Globe,
+    title: "Live iNaturalist Data",
     description:
-      "Sub-second inference on batches of 30+ events. The pipeline runs entirely client-side with no external API calls — zero cold starts, instant results.",
+      "Pulls real-time endangered species observations from the world's largest citizen science platform. No API key required — real data, real species, real locations.",
   },
   {
     icon: Shield,
-    title: "Rule-Based Failsafe",
+    title: "Conservation-Aware",
     description:
-      "Critical conditions (panic button, extreme heart rate, velocity) are caught by deterministic rules regardless of ML scores. Safety-first classification.",
+      "IUCN conservation status is a core feature. Critically endangered species in unexpected locations are flagged with higher severity — prioritizing what matters most.",
   },
   {
     icon: Radio,
     title: "Live Alert Dispatch",
     description:
-      "Anomalies are classified by type and severity, then dispatched to the dashboard in real-time. Each alert includes model scores, evidence, and confidence.",
+      "Anomalies are classified into 8 categories (range, temporal, cluster, rarity, captive escape, misidentification, habitat mismatch, poaching indicator) with severity levels.",
   },
   {
     icon: Terminal,
     title: "Pipeline Transparency",
     description:
-      "Every stage is timed and logged. See exactly how long feature extraction, model inference, and classification took for each batch.",
+      "Every stage is timed and logged. See exactly how long data ingestion, feature extraction, model inference, and classification took for each batch.",
   },
   {
     icon: BarChart3,
     title: "Anomaly Visualization",
     description:
-      "Interactive charts show anomaly distribution across models, time-based trends, and detailed evidence for every flagged event.",
+      "Interactive dashboard shows anomaly distribution across categories, species cards with photos, model score breakdowns, and detailed evidence for every flagged sighting.",
   },
   {
     icon: Cpu,
     title: "TypeScript ML Engine",
     description:
-      "Full machine learning pipeline implemented in TypeScript — no Python dependencies, runs entirely in the browser and server-side.",
+      "Full machine learning pipeline implemented in TypeScript — no Python dependencies. Runs entirely server-side in Next.js API routes, deployed on Vercel.",
   },
 ];
 
@@ -160,21 +160,21 @@ const techStack = [
     category: "ML Engine",
     name: "Ensemble Models",
     description:
-      "Isolation Forest, Elliptic Envelope, One-Class SVM, and Autoencoder running as a weighted ensemble.",
+      "Isolation Forest, Elliptic Envelope, One-Class SVM, and Autoencoder running as a weighted ensemble on 16 wildlife-specific features.",
   },
   {
     icon: Server,
     category: "Frontend + API",
     name: "Next.js 14",
     description:
-      "App Router with TypeScript, API routes for detection pipeline, server-side rendering.",
+      "App Router with TypeScript, API routes for detection pipeline, ISR caching, server-side rendering.",
   },
   {
     icon: Database,
-    category: "Data Pipeline",
-    name: "TypeScript ML",
+    category: "Data Source",
+    name: "iNaturalist API",
     description:
-      "Full ML pipeline in TypeScript. 20-feature extraction, haversine distances, z-scores, rolling stats.",
+      "Real-time endangered species observations from citizen scientists worldwide. No API key. ISR-cached on Vercel.",
   },
   {
     icon: Gauge,
@@ -187,29 +187,29 @@ const techStack = [
 
 const faqs = [
   {
-    question: "What makes Sentinel different from other anomaly detection systems?",
+    question: "What real problem does Sentinel solve?",
     answer:
-      "Sentinel uses a unique 4-model ensemble approach combining tree-based, statistical, kernel, and neural network methods. This diversity ensures robust detection across different anomaly types while maintaining sub-second latency.",
+      "Sentinel detects anomalous wildlife sightings — endangered animals appearing in unusual locations, at unusual times, or in unusual patterns. This can flag potential poaching displacement, habitat disruption, illegal wildlife trade, captive escapes, or species misidentification.",
   },
   {
     question: "How does the ensemble scoring work?",
     answer:
-      "Each model produces an anomaly score between 0 and 1. We weight these scores (IF: 30%, EE: 25%, SVM: 20%, AE: 25%) and combine them into a final ensemble score. Isolation Forest gets the highest weight due to its robustness. Rule-based overrides handle critical edge cases.",
+      "Each model produces an anomaly score between 0 and 1. We weight these scores (IF: 30%, EE: 25%, SVM: 20%, AE: 25%) and combine them into a final ensemble score. Isolation Forest gets the highest weight due to its robustness with high-dimensional data. Rule-based overrides handle conservation-critical edge cases.",
   },
   {
-    question: "Can I use my own data with Sentinel?",
+    question: "Where does the data come from?",
     answer:
-      "Yes! The Data Injector panel on the dashboard accepts custom JSON telemetry data. You can input your own sensor readings and run detection immediately.",
+      "Sentinel uses the iNaturalist API — the world's largest citizen science biodiversity platform with over 150 million observations. It filters for threatened species (IUCN Red List) and returns research-grade observations with verified identifications, GPS coordinates, timestamps, and photos.",
   },
   {
-    question: "What telemetry features does Sentinel analyze?",
+    question: "What wildlife features does Sentinel analyze?",
     answer:
-      "Sentinel extracts 20 features per data point: GPS coordinates, altitude, speed, acceleration, bearing, distance traveled, heart rate, battery level, network signal, and rolling statistics (mean, std, z-scores) for temporal context.",
+      "Sentinel extracts 16 features per sighting: spatial isolation metrics, distance to species centroid, nearest-neighbor distance, geographic density, range deviation from peer sightings, IUCN rarity score, species frequency, temporal isolation, positional accuracy, quality grade, and captive status.",
   },
   {
     question: "Is this ready for production use?",
     answer:
-      "Sentinel is a portfolio demonstration project. For production deployment, you'd need to train models on your specific dataset, add authentication, integrate with real alert systems, and implement data persistence.",
+      "Sentinel is a portfolio project demonstrating real ML engineering applied to a real conservation problem. For production deployment, you'd need species-specific trained models, historical range databases, integration with conservation alert systems, and data persistence.",
   },
 ];
 
@@ -217,24 +217,28 @@ const apiEndpoints = [
   {
     method: "POST",
     path: "/api/detect",
-    description: "Run anomaly detection on telemetry data",
+    description: "Run anomaly detection on wildlife sighting data",
     params: [
-      { name: "scenario", type: "string", optional: true, description: "Predefined scenario name (mixed, normal, emergency, etc.)" },
-      { name: "telemetry", type: "array", optional: true, description: "Array of telemetry events (max 100)" },
+      { name: "region", type: "string", optional: true, description: "Region key (global, africa, south_asia, etc.)" },
+      { name: "taxon", type: "string", optional: true, description: "Taxon group (Mammalia, Aves, Reptilia, all)" },
+      { name: "count", type: "number", optional: true, description: "Number of sightings to fetch (max 50)" },
+      { name: "threshold", type: "number", optional: true, description: "Anomaly sensitivity threshold (0.1 - 0.9)" },
+      { name: "scenario", type: "string", optional: true, description: "Use fallback data: mixed, normal, range_anomalies, cluster_event, captive_escapes" },
     ],
-    example: `curl -X POST https://sentinel.vercel.app/api/detect \\
+    example: `curl -X POST https://your-app.vercel.app/api/detect \\
   -H "Content-Type: application/json" \\
   -d '{
-    "scenario": "mixed",
+    "region": "africa",
+    "taxon": "Mammalia",
     "count": 30
   }'`,
   },
   {
     method: "GET",
     path: "/api/detect",
-    description: "Get API status and available scenarios",
+    description: "Get API status, available regions, taxon groups, and anomaly types",
     params: [],
-    example: `curl https://sentinel.vercel.app/api/detect`,
+    example: `curl https://your-app.vercel.app/api/detect`,
   },
 ];
 
@@ -242,29 +246,29 @@ const modelDetails = [
   {
     name: "Isolation Forest",
     abbreviation: "IF",
-    description: "Tree-based model that isolates anomalies by random partitioning. Works by measuring the average path length required to isolate a data point.",
+    description: "Tree-based model that isolates anomalies by random partitioning. Sightings with extreme spatial isolation, rare species, or high range deviation are easy to isolate — producing high anomaly scores.",
     strength: "Fast, handles high-dimensional data well",
     weight: "30%",
   },
   {
     name: "Elliptic Envelope",
     abbreviation: "EE",
-    description: "Assumes data is Gaussian distributed and fits an ellipse around normal observations using Mahalanobis distance.",
+    description: "Fits an ellipse around \"normal\" wildlife observations using Mahalanobis distance. Sightings that fall far from the normal centroid across multiple feature dimensions are flagged.",
     strength: "Good for normally distributed data",
     weight: "25%",
   },
   {
     name: "One-Class SVM",
     abbreviation: "SVM",
-    description: "Kernel-based method that learns a decision boundary around normal data points using RBF kernel.",
+    description: "Kernel-based method using RBF kernel. Learns a decision boundary around normal sighting patterns — support vectors represent typical observations.",
     strength: "Captures complex non-linear boundaries",
     weight: "20%",
   },
   {
     name: "Autoencoder",
     abbreviation: "AE",
-    description: "Neural network that learns to reconstruct normal data. High reconstruction error indicates anomalies.",
-    strength: "Captures complex patterns, good for temporal data",
+    description: "Neural network that compresses sighting features through a 3D bottleneck and attempts reconstruction. Normal sightings reconstruct well; anomalous ones produce high reconstruction error.",
+    strength: "Captures complex patterns, good for mixed data",
     weight: "25%",
   },
 ];
@@ -469,7 +473,7 @@ export default function HomePage() {
             className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full border border-radar-green/20 bg-radar-greenDim text-xs text-radar-green"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-radar-green animate-pulse" />
-            Real-Time ML Pipeline &middot; v2.0
+            Live iNaturalist Data &middot; ML Pipeline v2.0
           </motion.div>
 
           <motion.h1
@@ -479,6 +483,8 @@ export default function HomePage() {
             className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
           >
             <span className="radar-gradient-text">Sentinel</span>
+            <br />
+            <span className="text-2xl md:text-3xl font-medium text-zinc-500">Wildlife Guardian</span>
           </motion.h1>
           
           <motion.p
@@ -487,9 +493,9 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            Real-time tourist safety monitoring through GPS trajectory analysis
-            and IoT sensor telemetry. Ensemble ML models detect anomalies and
-            dispatch intelligent alerts.
+            Detecting anomalous endangered species sightings using real-time
+            data from iNaturalist and a 4-model ML ensemble. Flags range anomalies,
+            poaching displacement, and habitat disruption.
           </motion.p>
 
           <motion.div
@@ -583,8 +589,8 @@ export default function HomePage() {
               custom={2}
               className="text-zinc-400 max-w-xl"
             >
-              A three-stage processing pipeline that transforms raw IoT
-              telemetry into real-time anomaly alerts.
+              A three-stage pipeline that transforms live wildlife observations
+              into real-time anomaly alerts for conservation monitoring.
             </motion.p>
           </motion.div>
 
@@ -688,8 +694,8 @@ export default function HomePage() {
               custom={2}
               className="text-zinc-400 max-w-xl"
             >
-              Each model captures different anomaly patterns. Combined together,
-              they achieve higher accuracy than any single model alone.
+              Each model captures different anomaly patterns in wildlife data. Combined together,
+              they detect range violations, temporal outliers, and rarity spikes that single models miss.
             </motion.p>
           </motion.div>
 
@@ -729,8 +735,8 @@ export default function HomePage() {
               custom={2}
               className="text-zinc-400 max-w-xl"
             >
-              Integrate Sentinel&apos;s anomaly detection into your own applications
-              using our REST API.
+              Integrate Sentinel&apos;s wildlife anomaly detection into your own
+              conservation tools using our REST API.
             </motion.p>
           </motion.div>
 
@@ -763,15 +769,15 @@ export default function HomePage() {
               custom={1}
               className="text-3xl md:text-4xl font-bold radar-gradient-text mb-4"
             >
-              Engineered for Depth
+              Engineered for Conservation
             </motion.h2>
             <motion.p
               variants={fadeUp}
               custom={2}
               className="text-zinc-400 max-w-xl"
             >
-              Every design decision serves a purpose — from how we extract
-              features to how we ensemble models.
+              Every design decision serves conservation monitoring — from how we
+              extract features to how we classify anomaly severity.
             </motion.p>
           </motion.div>
 
@@ -828,7 +834,7 @@ export default function HomePage() {
               className="text-zinc-400 max-w-xl"
             >
               Production-grade architecture, deployed on Vercel as a single
-              application.
+              application with live data from iNaturalist.
             </motion.p>
           </motion.div>
 
@@ -907,7 +913,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-3xl md:text-4xl font-bold radar-gradient-text mb-6"
           >
-            Ready to see anomaly
+            Ready to see wildlife anomaly
             <br />
             detection in action?
           </motion.h2>
@@ -918,9 +924,9 @@ export default function HomePage() {
             transition={{ delay: 0.1 }}
             className="text-zinc-400 mb-8 max-w-lg mx-auto"
           >
-            Generate dummy telemetry data, run it through the 4-model ensemble
-            pipeline, and watch anomalies appear on the live dashboard in
-            real-time.
+            Fetch live endangered species data from iNaturalist, run it through
+            the 4-model ensemble pipeline, and watch anomalies appear on the
+            dashboard in real-time.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -956,11 +962,11 @@ export default function HomePage() {
             <div className="w-6 h-6 rounded-md bg-radar-greenDim flex items-center justify-center border border-radar-green/30">
               <Crosshair className="w-3 h-3 text-radar-green" />
             </div>
-            <span className="text-sm font-medium text-zinc-400">sentinel</span>
+            <span className="text-sm font-medium text-zinc-400">sentinel wildlife</span>
           </div>
           <p className="text-xs text-zinc-600">
-            Anomaly Detection Pipeline &middot; Ensemble ML &middot; Next.js 14
-            &middot; Vercel
+            Wildlife Anomaly Detection &middot; Ensemble ML &middot; iNaturalist
+            &middot; Next.js 14 &middot; Vercel
           </p>
         </div>
       </footer>

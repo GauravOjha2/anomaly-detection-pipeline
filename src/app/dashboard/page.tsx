@@ -7,6 +7,7 @@ import {
   Activity,
   AlertTriangle,
   ArrowLeft,
+  Bird,
   Brain,
   CheckCircle2,
   ChevronDown,
@@ -14,7 +15,9 @@ import {
   Clock,
   Code2,
   Download,
+  Eye,
   Gauge,
+  Globe,
   History,
   Loader2,
   MapPin,
@@ -28,20 +31,34 @@ import {
   Timer,
   Zap,
 } from "lucide-react";
-import { DetectionResult, Alert, TelemetryEvent, AnomalyType, AlertLevel } from "@/lib/types";
-import { Scenario } from "@/lib/mock-data";
+import { DetectionResult, Alert, WildlifeSighting, AnomalyType, AlertLevel, ConservationStatus } from "@/lib/types";
+import { FallbackScenario } from "@/lib/mock-data";
+import { REGIONS } from "@/lib/inaturalist";
 
 // ============================================================
 // CONSTANTS
 // ============================================================
 
-const SCENARIOS: { value: Scenario; label: string; description: string }[] = [
-  { value: "mixed", label: "Mixed Scenarios", description: "Realistic mix of normal + anomalous patterns" },
-  { value: "normal", label: "Normal Activity", description: "Standard tourist walking patterns" },
-  { value: "emergency", label: "Emergency", description: "Escalating speed, panic button, high heart rate" },
-  { value: "health_anomaly", label: "Health Anomaly", description: "Gradual heart rate spike to critical" },
-  { value: "device_failure", label: "Device Failure", description: "Battery drain, GPS degradation" },
-  { value: "extreme", label: "Extreme", description: "All sensors in anomalous ranges" },
+const SCENARIOS: { value: FallbackScenario; label: string; description: string }[] = [
+  { value: "mixed", label: "Mixed", description: "Balanced mix of normal sightings + various anomalies" },
+  { value: "normal", label: "Normal", description: "Standard sightings within expected ranges" },
+  { value: "range_anomalies", label: "Range Anomalies", description: "Species observed far outside known range" },
+  { value: "cluster_event", label: "Cluster Event", description: "Dense cluster of sightings in a small area" },
+  { value: "captive_escapes", label: "Captive Escapes", description: "Captive animals sighted in wild areas" },
+];
+
+const REGION_OPTIONS = Object.entries(REGIONS).map(([key, val]) => ({
+  value: key,
+  label: val.label,
+  description: val.description,
+}));
+
+const TAXON_OPTIONS = [
+  { value: "all", label: "All Taxa" },
+  { value: "Mammalia", label: "Mammals" },
+  { value: "Aves", label: "Birds" },
+  { value: "Reptilia", label: "Reptiles" },
+  { value: "Amphibia", label: "Amphibians" },
 ];
 
 const SEVERITY_CONFIG: Record<AlertLevel, { color: string; bg: string; border: string; icon: typeof AlertTriangle }> = {
@@ -52,16 +69,24 @@ const SEVERITY_CONFIG: Record<AlertLevel, { color: string; bg: string; border: s
 };
 
 const ANOMALY_LABELS: Record<AnomalyType, string> = {
-  PANIC: "Panic Button Activated",
-  HEART_RATE_HIGH: "Critical Heart Rate (High)",
-  HEART_RATE_LOW: "Critical Heart Rate (Low)",
-  BATTERY_CRITICAL: "Battery Critical",
-  VELOCITY_CRITICAL: "Extreme Velocity",
-  VELOCITY_HIGH: "High Velocity",
-  PROLONGED_INACTIVITY: "Prolonged Inactivity",
-  ROUTE_DEVIATION: "Route Deviation",
-  GEOFENCE_BREACH: "Geofence Breach",
+  RANGE_ANOMALY: "Range Anomaly",
+  TEMPORAL_ANOMALY: "Temporal Anomaly",
+  CLUSTER_ANOMALY: "Cluster Anomaly",
+  RARITY_ANOMALY: "Rarity Anomaly",
+  CAPTIVE_ESCAPE: "Captive Escape",
+  MISIDENTIFICATION: "Misidentification",
+  HABITAT_MISMATCH: "Habitat Mismatch",
+  POACHING_INDICATOR: "Poaching Indicator",
   NORMAL: "Normal",
+};
+
+const CONSERVATION_BADGES: Record<ConservationStatus, { label: string; color: string; bg: string }> = {
+  critically_endangered: { label: "CR", color: "text-red-400", bg: "bg-red-500/15" },
+  endangered: { label: "EN", color: "text-orange-400", bg: "bg-orange-500/15" },
+  vulnerable: { label: "VU", color: "text-amber-400", bg: "bg-amber-500/15" },
+  near_threatened: { label: "NT", color: "text-yellow-400", bg: "bg-yellow-500/15" },
+  least_concern: { label: "LC", color: "text-emerald-400", bg: "bg-emerald-500/15" },
+  unknown: { label: "??", color: "text-zinc-400", bg: "bg-zinc-500/15" },
 };
 
 const STREAMING_INTERVALS = [
@@ -74,43 +99,98 @@ const STREAMING_INTERVALS = [
 // INJECTOR TEMPLATE
 // ============================================================
 
-function generateInjectorTemplate(): TelemetryEvent[] {
+function generateInjectorTemplate(): WildlifeSighting[] {
   const now = new Date();
   return [
     {
-      tourist_id: "INJECT-001",
-      lat: 39.9042, lng: 116.4074,
-      timestamp: new Date(now.getTime() - 8 * 60000).toISOString(),
-      heart_rate: 72, battery_level: 85, network_status: "connected",
-      panic_button: false, accuracy: 5, altitude: 45,
+      id: "inject_001",
+      species_name: "Panthera tigris",
+      common_name: "Tiger",
+      lat: 22.3,
+      lng: 78.8,
+      observed_at: new Date(now.getTime() - 8 * 60000).toISOString(),
+      place_name: "Kanha National Park, India",
+      conservation_status: "endangered",
+      iucn_level: 40,
+      photo_url: null,
+      observer: "field_bio_22",
+      quality_grade: "research",
+      iconic_taxon: "Mammalia",
+      taxon_id: 41944,
+      positional_accuracy: 10,
+      captive: false,
     },
     {
-      tourist_id: "INJECT-001",
-      lat: 39.9045, lng: 116.4078,
-      timestamp: new Date(now.getTime() - 6 * 60000).toISOString(),
-      heart_rate: 75, battery_level: 83, network_status: "connected",
-      panic_button: false, accuracy: 4, altitude: 46,
+      id: "inject_002",
+      species_name: "Panthera tigris",
+      common_name: "Tiger",
+      lat: 22.31,
+      lng: 78.82,
+      observed_at: new Date(now.getTime() - 6 * 60000).toISOString(),
+      place_name: "Kanha National Park, India",
+      conservation_status: "endangered",
+      iucn_level: 40,
+      photo_url: null,
+      observer: "safari_guide_jm",
+      quality_grade: "research",
+      iconic_taxon: "Mammalia",
+      taxon_id: 41944,
+      positional_accuracy: 8,
+      captive: false,
     },
     {
-      tourist_id: "INJECT-001",
-      lat: 39.9048, lng: 116.4082,
-      timestamp: new Date(now.getTime() - 4 * 60000).toISOString(),
-      heart_rate: 110, battery_level: 80, network_status: "connected",
-      panic_button: false, accuracy: 6, altitude: 45,
+      id: "inject_003",
+      species_name: "Panthera tigris",
+      common_name: "Tiger",
+      lat: 51.5,
+      lng: -0.12,
+      observed_at: new Date(now.getTime() - 4 * 60000).toISOString(),
+      place_name: "Central London, UK",
+      conservation_status: "endangered",
+      iucn_level: 40,
+      photo_url: null,
+      observer: "wildlife_watcher",
+      quality_grade: "casual",
+      iconic_taxon: "Mammalia",
+      taxon_id: 41944,
+      positional_accuracy: 100,
+      captive: false,
     },
     {
-      tourist_id: "INJECT-001",
-      lat: 39.9120, lng: 116.4200,
-      timestamp: new Date(now.getTime() - 2 * 60000).toISOString(),
-      heart_rate: 155, battery_level: 78, network_status: "weak",
-      panic_button: false, accuracy: 15, altitude: 44,
+      id: "inject_004",
+      species_name: "Diceros bicornis",
+      common_name: "Black Rhinoceros",
+      lat: -1.95,
+      lng: 30.06,
+      observed_at: new Date(now.getTime() - 2 * 60000).toISOString(),
+      place_name: "Akagera National Park, Rwanda",
+      conservation_status: "critically_endangered",
+      iucn_level: 50,
+      photo_url: null,
+      observer: "eco_ranger",
+      quality_grade: "research",
+      iconic_taxon: "Mammalia",
+      taxon_id: 43352,
+      positional_accuracy: 15,
+      captive: false,
     },
     {
-      tourist_id: "INJECT-001",
-      lat: 39.9250, lng: 116.4350,
-      timestamp: new Date(now.getTime()).toISOString(),
-      heart_rate: 180, battery_level: 5, network_status: "disconnected",
-      panic_button: true, accuracy: 50, altitude: 42,
+      id: "inject_005",
+      species_name: "Gorilla beringei",
+      common_name: "Eastern Gorilla",
+      lat: 40.78,
+      lng: -73.97,
+      observed_at: new Date(now.getTime()).toISOString(),
+      place_name: "Central Park, New York",
+      conservation_status: "critically_endangered",
+      iucn_level: 50,
+      photo_url: null,
+      observer: "naturalist_k",
+      quality_grade: "casual",
+      iconic_taxon: "Mammalia",
+      taxon_id: 43390,
+      positional_accuracy: 50,
+      captive: true,
     },
   ];
 }
@@ -122,24 +202,26 @@ function generateInjectorTemplate(): TelemetryEvent[] {
 interface HistoryEntry {
   id: string;
   timestamp: Date;
-  scenario: string;
+  label: string;
   source: string;
   anomaly_count: number;
   processing_time_ms: number;
   alerts_critical: number;
   alerts_warning: number;
-  events_processed: number;
+  sightings_processed: number;
 }
 
 // ============================================================
 // MAIN DASHBOARD COMPONENT
 // ============================================================
 
-type InputMode = "scenario" | "injector";
+type InputMode = "live" | "scenario" | "injector";
 
 export default function DashboardPage() {
-  const [mode, setMode] = useState<InputMode>("scenario");
-  const [scenario, setScenario] = useState<Scenario>("mixed");
+  const [mode, setMode] = useState<InputMode>("live");
+  const [scenario, setScenario] = useState<FallbackScenario>("mixed");
+  const [region, setRegion] = useState("global");
+  const [taxon, setTaxon] = useState("all");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DetectionResult | null>(null);
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
@@ -189,23 +271,26 @@ export default function DashboardPage() {
         }
 
         if (!Array.isArray(parsed) || parsed.length < 2) {
-          setInjectorError("Telemetry must be an array with at least 2 events.");
+          setInjectorError("Sightings must be an array with at least 2 entries.");
           setLoading(false);
           return;
         }
 
         for (let i = 0; i < parsed.length; i++) {
-          const evt = parsed[i] as Record<string, unknown>;
-          if (typeof evt.lat !== "number" || typeof evt.lng !== "number" || !evt.timestamp || !evt.tourist_id) {
-            setInjectorError(`Event ${i}: must have tourist_id (string), lat (number), lng (number), timestamp (string).`);
+          const s = parsed[i] as Record<string, unknown>;
+          if (typeof s.lat !== "number" || typeof s.lng !== "number" || !s.observed_at || !s.species_name) {
+            setInjectorError(`Sighting ${i}: must have species_name (string), lat (number), lng (number), observed_at (string).`);
             setLoading(false);
             return;
           }
         }
 
-        body = { telemetry: parsed, threshold };
+        body = { sightings: parsed, threshold };
+      } else if (mode === "scenario") {
+        body = { scenario, count: 30, threshold };
       } else {
-        body = { scenario, count: 30, tourist_count: 5, threshold };
+        // Live iNaturalist mode
+        body = { region, taxon, count: 30, threshold };
       }
 
       const res = await fetch("/api/detect", {
@@ -225,16 +310,22 @@ export default function DashboardPage() {
       setResult(data);
 
       // Add to history
+      const label =
+        mode === "injector"
+          ? "Custom Injection"
+          : mode === "scenario"
+          ? `Scenario: ${scenario}`
+          : `Live: ${REGIONS[region]?.label || region}`;
       const entry: HistoryEntry = {
         id: `run_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
         timestamp: new Date(),
-        scenario: mode === "injector" ? "Custom Injection" : scenario,
-        source: mode === "injector" ? "injected" : "generated",
+        label,
+        source: mode,
         anomaly_count: data.anomaly_count,
         processing_time_ms: data.processing_time_ms,
         alerts_critical: data.alerts.filter((a: Alert) => a.alert_level === "CRITICAL").length,
         alerts_warning: data.alerts.filter((a: Alert) => a.alert_level === "WARNING").length,
-        events_processed: data.telemetry_processed,
+        sightings_processed: data.sightings_processed,
       };
       setHistory(prev => [entry, ...prev].slice(0, 50));
 
@@ -244,7 +335,7 @@ export default function DashboardPage() {
     } finally {
       if (!isStream) setLoading(false);
     }
-  }, [scenario, mode, injectorJson, threshold]);
+  }, [scenario, mode, region, taxon, injectorJson, threshold]);
 
   // Streaming toggle
   const toggleStreaming = useCallback(() => {
@@ -255,7 +346,6 @@ export default function DashboardPage() {
     } else {
       setStreaming(true);
       setStreamCount(0);
-      // Run immediately
       runDetection(true);
       streamRef.current = setInterval(() => runDetection(true), streamInterval);
     }
@@ -283,25 +373,25 @@ export default function DashboardPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `sentinel-detection-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`;
+    a.download = `sentinel-wildlife-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, [result]);
 
   const exportCSV = useCallback(() => {
     if (!result || result.alerts.length === 0) return;
-    const headers = ["alert_id", "tourist_id", "anomaly_type", "alert_level", "confidence_score", "lat", "lng", "timestamp", "models_used", "features_extracted"];
+    const headers = ["alert_id", "species_name", "common_name", "anomaly_type", "alert_level", "confidence_score", "conservation_status", "lat", "lng", "place_name", "timestamp", "models_used", "features_extracted"];
     const rows = result.alerts.map(a => [
-      a.alert_id, a.tourist_id, a.anomaly_type, a.alert_level,
-      a.confidence_score, a.location.lat, a.location.lng,
-      a.timestamp, a.models_used.join(";"), a.features_extracted,
+      a.alert_id, a.species_name, a.common_name, a.anomaly_type, a.alert_level,
+      a.confidence_score, a.conservation_status, a.location.lat, a.location.lng,
+      `"${a.place_name}"`, a.timestamp, a.models_used.join(";"), a.features_extracted,
     ]);
     const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `sentinel-alerts-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`;
+    a.download = `sentinel-wildlife-alerts-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }, [result]);
@@ -325,10 +415,19 @@ export default function DashboardPage() {
               <div className="w-6 h-6 rounded-md bg-blue-500/15 border border-blue-500/30 flex items-center justify-center">
                 <Activity className="w-3 h-3 text-blue-400" />
               </div>
-              <span className="text-sm font-medium text-white">Dashboard</span>
+              <span className="text-sm font-medium text-white">Wildlife Dashboard</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* Data source indicator */}
+            {result && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.03] border border-white/[0.06]">
+                <Globe className="w-3 h-3 text-zinc-500" />
+                <span className="text-[10px] text-zinc-500 font-mono">
+                  {result.data_source === "inaturalist_live" ? "iNaturalist" : "Generated"}
+                </span>
+              </div>
+            )}
             {/* Streaming indicator */}
             {streaming && (
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-500/10 border border-blue-500/20 animate-pulse">
@@ -355,6 +454,17 @@ export default function DashboardPage() {
         <div className="flex flex-wrap items-center gap-2 mb-4">
           {/* Mode tabs */}
           <div className="flex items-center gap-1 p-1 radar-card rounded-lg">
+            <button
+              onClick={() => setMode("live")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                mode === "live"
+                  ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                  : "text-zinc-500 hover:text-zinc-300"
+              }`}
+            >
+              <Globe className="w-3 h-3" />
+              Live Data
+            </button>
             <button
               onClick={() => setMode("scenario")}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
@@ -546,8 +656,8 @@ export default function DashboardPage() {
                         <span className="text-zinc-600 font-mono w-16 flex-shrink-0">
                           {entry.timestamp.toLocaleTimeString()}
                         </span>
-                        <span className="text-zinc-400 truncate flex-1">{entry.scenario}</span>
-                        <span className="text-zinc-600 font-mono">{entry.events_processed} evts</span>
+                        <span className="text-zinc-400 truncate flex-1">{entry.label}</span>
+                        <span className="text-zinc-600 font-mono">{entry.sightings_processed} sightings</span>
                         <div className="flex items-center gap-2">
                           {entry.alerts_critical > 0 && (
                             <span className="text-red-400 font-mono">{entry.alerts_critical}C</span>
@@ -569,15 +679,82 @@ export default function DashboardPage() {
           )}
         </AnimatePresence>
 
+        {/* ===== LIVE DATA CONTROLS ===== */}
+        {mode === "live" && (
+          <div className="radar-card rounded-xl p-4 md:p-6 mb-6">
+            <div className="flex flex-col md:flex-row md:items-end gap-4">
+              <div className="flex-1 space-y-3">
+                <label className="text-xs text-zinc-500 uppercase tracking-wider block">
+                  iNaturalist — Live Endangered Species Data
+                </label>
+                <div className="flex flex-wrap gap-3">
+                  <div>
+                    <label className="text-[10px] text-zinc-600 block mb-1">Region</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {REGION_OPTIONS.map((r) => (
+                        <button
+                          key={r.value}
+                          onClick={() => setRegion(r.value)}
+                          className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                            region === r.value
+                              ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                              : "bg-white/[0.03] text-zinc-500 border border-white/[0.06] hover:bg-white/[0.06] hover:text-zinc-300"
+                          }`}
+                        >
+                          {r.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-zinc-600 block mb-1">Taxon Group</label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {TAXON_OPTIONS.map((t) => (
+                        <button
+                          key={t.value}
+                          onClick={() => setTaxon(t.value)}
+                          className={`px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                            taxon === t.value
+                              ? "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                              : "bg-white/[0.03] text-zinc-500 border border-white/[0.06] hover:bg-white/[0.06] hover:text-zinc-300"
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => runDetection(false)}
+                disabled={loading || streaming}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 border border-blue-500/30 hover:border-blue-500/50 disabled:opacity-50 text-sm font-medium rounded-lg transition-all hover:shadow-lg hover:shadow-blue-500/10 disabled:cursor-not-allowed min-w-[160px]"
+              >
+                {loading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Fetching...</>
+                ) : (
+                  <><Globe className="w-4 h-4" /> Fetch &amp; Detect</>
+                )}
+              </button>
+            </div>
+            {!result && !loading && (
+              <p className="text-xs text-zinc-600 mt-3">
+                Fetches real endangered species observations from iNaturalist and runs anomaly detection.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* ===== SCENARIO CONTROLS ===== */}
         {mode === "scenario" && (
           <div className="radar-card rounded-xl p-4 md:p-6 mb-6">
             <div className="flex flex-col md:flex-row md:items-end gap-4">
               <div className="flex-1">
                 <label className="text-xs text-zinc-500 uppercase tracking-wider mb-2 block">
-                  Telemetry Scenario
+                  Wildlife Scenario
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
                   {SCENARIOS.map((s) => (
                     <button
                       key={s.value}
@@ -607,7 +784,7 @@ export default function DashboardPage() {
             </div>
             {!result && !loading && (
               <p className="text-xs text-zinc-600 mt-3">
-                Select a scenario and click &quot;Run Detection&quot; to generate telemetry and run the ML pipeline.
+                Select a scenario and click &quot;Run Detection&quot; to generate wildlife sightings and run the ML pipeline.
               </p>
             )}
           </div>
@@ -627,13 +804,13 @@ export default function DashboardPage() {
                 <div className="text-left">
                   <h3 className="text-sm font-medium text-white">Data Injector</h3>
                   <p className="text-[11px] text-zinc-500">
-                    Inject custom telemetry JSON into the detection pipeline
+                    Inject custom wildlife sighting JSON into the detection pipeline
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] text-blue-400/60 font-mono hidden sm:inline">
-                  max 100 events
+                  max 50 sightings
                 </span>
                 <ChevronDown className={`w-4 h-4 text-zinc-600 transition-transform ${injectorOpen ? "rotate-180" : ""}`} />
               </div>
@@ -654,8 +831,8 @@ export default function DashboardPage() {
                       <Code2 className="w-3.5 h-3.5 text-blue-400 mt-0.5 flex-shrink-0" />
                       <div className="text-[11px] text-zinc-500 leading-relaxed">
                         <span className="text-blue-400 font-medium">Schema:</span>{" "}
-                        Each event needs <code className="text-zinc-300">tourist_id</code>, <code className="text-zinc-300">lat</code>, <code className="text-zinc-300">lng</code>, <code className="text-zinc-300">timestamp</code>.
-                        Optional: <code className="text-zinc-300">heart_rate</code>, <code className="text-zinc-300">battery_level</code>, <code className="text-zinc-300">panic_button</code>, <code className="text-zinc-300">network_status</code>, <code className="text-zinc-300">accuracy</code>, <code className="text-zinc-300">altitude</code>.
+                        Each sighting needs <code className="text-zinc-300">species_name</code>, <code className="text-zinc-300">common_name</code>, <code className="text-zinc-300">lat</code>, <code className="text-zinc-300">lng</code>, <code className="text-zinc-300">observed_at</code>.
+                        Optional: <code className="text-zinc-300">conservation_status</code>, <code className="text-zinc-300">iucn_level</code>, <code className="text-zinc-300">captive</code>, <code className="text-zinc-300">quality_grade</code>, <code className="text-zinc-300">positional_accuracy</code>.
                       </div>
                     </div>
 
@@ -665,7 +842,7 @@ export default function DashboardPage() {
                       onChange={(e) => { setInjectorJson(e.target.value); setInjectorError(null); }}
                       spellCheck={false}
                       className="w-full h-64 bg-[#0c0c0e] border border-white/[0.06] rounded-lg p-4 text-xs font-mono text-blue-400/80 leading-relaxed resize-y focus:outline-none focus:border-blue-500/30 focus:ring-1 focus:ring-blue-500/20 placeholder-zinc-700"
-                      placeholder="Paste your TelemetryEvent[] JSON here..."
+                      placeholder="Paste your WildlifeSighting[] JSON here..."
                     />
 
                     {/* Error */}
@@ -697,7 +874,7 @@ export default function DashboardPage() {
                       </button>
                       <div className="flex-1" />
                       <span className="text-[10px] text-zinc-600 font-mono hidden md:inline">
-                        {(() => { try { return `${JSON.parse(injectorJson).length} events`; } catch { return "invalid"; } })()}
+                        {(() => { try { return `${JSON.parse(injectorJson).length} sightings`; } catch { return "invalid"; } })()}
                       </span>
                     </div>
                   </div>
@@ -793,9 +970,13 @@ export default function DashboardPage() {
               {result && (
                 <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-zinc-500">
                   <span>Total: <span className="text-white font-mono">{result.processing_time_ms}ms</span></span>
-                  <span>Events: <span className="text-white font-mono">{result.telemetry_processed}</span></span>
-                  <span>Features: <span className="text-white font-mono">20 x {result.telemetry_processed}</span></span>
+                  <span>Sightings: <span className="text-white font-mono">{result.sightings_processed}</span></span>
+                  <span>Species: <span className="text-white font-mono">{result.species_analyzed}</span></span>
+                  <span>Features: <span className="text-white font-mono">16 x {result.sightings_processed}</span></span>
                   <span>Threshold: <span className="text-blue-400 font-mono">{result.threshold_used?.toFixed(2) ?? "0.45"}</span></span>
+                  {result.region && (
+                    <span>Region: <span className="text-white font-mono">{result.region}</span></span>
+                  )}
                 </div>
               )}
             </motion.div>
@@ -842,19 +1023,19 @@ export default function DashboardPage() {
                   <div>
                     <span className="text-zinc-600">Throughput</span>
                     <p className="text-white font-mono">
-                      {(result.telemetry_processed / (result.processing_time_ms / 1000)).toFixed(0)} events/s
+                      {(result.sightings_processed / (result.processing_time_ms / 1000)).toFixed(0)} sightings/s
                     </p>
                   </div>
                   <div>
-                    <span className="text-zinc-600">Avg per Event</span>
+                    <span className="text-zinc-600">Avg per Sighting</span>
                     <p className="text-white font-mono">
-                      {(result.processing_time_ms / result.telemetry_processed).toFixed(1)}ms
+                      {(result.processing_time_ms / result.sightings_processed).toFixed(1)}ms
                     </p>
                   </div>
                   <div>
                     <span className="text-zinc-600">Detection Rate</span>
                     <p className="text-white font-mono">
-                      {((result.anomaly_count / result.telemetry_processed) * 100).toFixed(1)}%
+                      {((result.anomaly_count / result.sightings_processed) * 100).toFixed(1)}%
                     </p>
                   </div>
                   <div>
@@ -883,6 +1064,7 @@ export default function DashboardPage() {
                       result.alerts.map((alert, i) => {
                         const config = SEVERITY_CONFIG[alert.alert_level];
                         const Icon = config.icon;
+                        const csBadge = CONSERVATION_BADGES[alert.conservation_status] || CONSERVATION_BADGES.unknown;
                         return (
                           <motion.button
                             key={alert.alert_id}
@@ -894,22 +1076,43 @@ export default function DashboardPage() {
                               selectedAlert?.alert_id === alert.alert_id ? "bg-white/[0.04]" : ""
                             }`}
                           >
-                            <div className={`w-8 h-8 rounded-lg ${config.bg} border ${config.border} flex items-center justify-center flex-shrink-0`}>
-                              <Icon className={`w-4 h-4 ${config.color}`} />
+                            {/* Species photo or icon */}
+                            <div className="relative flex-shrink-0">
+                              {alert.photo_url ? (
+                                <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/[0.08]">
+                                  <img
+                                    src={alert.photo_url}
+                                    alt={alert.common_name}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
+                                </div>
+                              ) : (
+                                <div className={`w-10 h-10 rounded-lg ${config.bg} border ${config.border} flex items-center justify-center`}>
+                                  <Icon className={`w-4 h-4 ${config.color}`} />
+                                </div>
+                              )}
+                              {/* Conservation status dot */}
+                              <span className={`absolute -top-1 -right-1 text-[8px] px-1 rounded ${csBadge.bg} ${csBadge.color} font-mono font-bold`}>
+                                {csBadge.label}
+                              </span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm text-white font-medium truncate">
-                                  {ANOMALY_LABELS[alert.anomaly_type]}
+                                  {alert.common_name}
                                 </span>
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded ${config.bg} ${config.color} border ${config.border} font-mono`}>
                                   {alert.alert_level}
                                 </span>
                               </div>
                               <div className="flex items-center gap-3 mt-0.5">
-                                <span className="text-[11px] text-zinc-600 font-mono">{alert.tourist_id}</span>
+                                <span className="text-[11px] text-zinc-500 italic truncate">{alert.species_name}</span>
+                                <span className="text-[10px] text-zinc-600">
+                                  {ANOMALY_LABELS[alert.anomaly_type]}
+                                </span>
                                 <span className="text-[11px] text-zinc-600">
-                                  {Math.round(alert.confidence_score * 100)}% confidence
+                                  {Math.round(alert.confidence_score * 100)}%
                                 </span>
                               </div>
                             </div>
@@ -928,27 +1131,46 @@ export default function DashboardPage() {
                   </div>
                   {selectedAlert ? (
                     <div className="p-4 md:p-6 space-y-4">
+                      {/* Photo */}
+                      {selectedAlert.photo_url && (
+                        <div className="w-full h-36 rounded-lg overflow-hidden border border-white/[0.08]">
+                          <img
+                            src={selectedAlert.photo_url}
+                            alt={selectedAlert.common_name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <span className={`text-[10px] px-1.5 py-0.5 rounded ${SEVERITY_CONFIG[selectedAlert.alert_level].bg} ${SEVERITY_CONFIG[selectedAlert.alert_level].color} border ${SEVERITY_CONFIG[selectedAlert.alert_level].border} font-mono`}>
                             {selectedAlert.alert_level}
                           </span>
+                          <ConservationBadge status={selectedAlert.conservation_status} />
                         </div>
                         <h4 className="text-lg font-semibold text-white">
-                          {ANOMALY_LABELS[selectedAlert.anomaly_type]}
+                          {selectedAlert.common_name}
                         </h4>
-                        <p className="text-xs text-zinc-500 font-mono mt-1">{selectedAlert.alert_id}</p>
+                        <p className="text-xs text-zinc-400 italic">{selectedAlert.species_name}</p>
+                        <p className="text-[10px] text-zinc-600 font-mono mt-1">{selectedAlert.alert_id}</p>
                       </div>
 
                       <div className="space-y-3">
-                        <DetailRow icon={MapPin} label="Tourist" value={selectedAlert.tourist_id} />
+                        <DetailRow icon={AlertTriangle} label="Anomaly" value={ANOMALY_LABELS[selectedAlert.anomaly_type]} />
+                        <DetailRow icon={Bird} label="Species" value={selectedAlert.common_name} />
                         <DetailRow
                           icon={MapPin}
                           label="Location"
+                          value={selectedAlert.place_name || `${selectedAlert.location.lat.toFixed(4)}, ${selectedAlert.location.lng.toFixed(4)}`}
+                        />
+                        <DetailRow
+                          icon={MapPin}
+                          label="Coordinates"
                           value={`${selectedAlert.location.lat.toFixed(4)}, ${selectedAlert.location.lng.toFixed(4)}`}
                         />
                         <DetailRow icon={Brain} label="Confidence" value={`${Math.round(selectedAlert.confidence_score * 100)}%`} />
-                        <DetailRow icon={Clock} label="Timestamp" value={new Date(selectedAlert.timestamp).toLocaleTimeString()} />
+                        <DetailRow icon={Clock} label="Observed" value={new Date(selectedAlert.timestamp).toLocaleString()} />
                         <DetailRow icon={Zap} label="Models Used" value={selectedAlert.models_used.length.toString()} />
                         <DetailRow icon={Activity} label="Features" value={`${selectedAlert.features_extracted}`} />
                       </div>
@@ -987,11 +1209,14 @@ export default function DashboardPage() {
                           <pre className="text-[10px] text-zinc-400 font-mono whitespace-pre-wrap overflow-x-auto">
                             {JSON.stringify(
                               {
-                                velocity_kmh: selectedAlert.raw_evidence.velocity_kmh,
-                                heart_rate: selectedAlert.raw_evidence.heart_rate,
-                                battery_level: selectedAlert.raw_evidence.battery_level,
-                                bearing_change: selectedAlert.raw_evidence.bearing_change,
-                                movement_efficiency: selectedAlert.raw_evidence.movement_efficiency,
+                                range_deviation: selectedAlert.raw_evidence.range_deviation_score,
+                                geographic_isolation: selectedAlert.raw_evidence.geographic_isolation_score,
+                                temporal_isolation: selectedAlert.raw_evidence.temporal_isolation_score,
+                                spatial_density: selectedAlert.raw_evidence.spatial_density,
+                                iucn_rarity: selectedAlert.raw_evidence.iucn_rarity_score,
+                                species_frequency: selectedAlert.raw_evidence.species_frequency,
+                                distance_to_centroid_km: selectedAlert.raw_evidence.distance_to_centroid_km,
+                                ensemble_score: selectedAlert.raw_evidence.ensemble_score,
                               },
                               null,
                               2
@@ -1002,7 +1227,7 @@ export default function DashboardPage() {
                     </div>
                   ) : (
                     <div className="p-8 text-center">
-                      <Radio className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
+                      <Eye className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
                       <p className="text-sm text-zinc-500">Select an alert to view details</p>
                     </div>
                   )}
@@ -1068,9 +1293,9 @@ export default function DashboardPage() {
                       <p className="text-white font-mono text-lg">{history.length}</p>
                     </div>
                     <div>
-                      <span className="text-zinc-600">Total Events</span>
+                      <span className="text-zinc-600">Total Sightings</span>
                       <p className="text-white font-mono text-lg">
-                        {history.reduce((sum, h) => sum + h.events_processed, 0)}
+                        {history.reduce((sum, h) => sum + h.sightings_processed, 0)}
                       </p>
                     </div>
                     <div>
@@ -1146,8 +1371,25 @@ function DetailRow({
   return (
     <div className="flex items-center gap-3">
       <Icon className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
-      <span className="text-xs text-zinc-500 w-20">{label}</span>
-      <span className="text-xs text-white font-mono">{value}</span>
+      <span className="text-xs text-zinc-500 w-24">{label}</span>
+      <span className="text-xs text-white font-mono truncate">{value}</span>
     </div>
+  );
+}
+
+function ConservationBadge({ status }: { status: ConservationStatus }) {
+  const badge = CONSERVATION_BADGES[status] || CONSERVATION_BADGES.unknown;
+  const fullNames: Record<ConservationStatus, string> = {
+    critically_endangered: "Critically Endangered",
+    endangered: "Endangered",
+    vulnerable: "Vulnerable",
+    near_threatened: "Near Threatened",
+    least_concern: "Least Concern",
+    unknown: "Unknown",
+  };
+  return (
+    <span className={`text-[10px] px-1.5 py-0.5 rounded ${badge.bg} ${badge.color} font-mono font-medium`}>
+      {badge.label} — {fullNames[status]}
+    </span>
   );
 }

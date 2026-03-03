@@ -43,6 +43,9 @@ export default function Navbar() {
           <span className="font-semibold text-white text-sm tracking-tight">
             sentinel
           </span>
+          <span className="text-[10px] text-radar-green/50 font-mono hidden sm:inline">
+            wildlife
+          </span>
         </Link>
 
         {/* Desktop links */}
