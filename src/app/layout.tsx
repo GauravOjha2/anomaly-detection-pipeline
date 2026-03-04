@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { SentinelProvider } from "@/lib/SentinelContext";
+import { AnimalTrackingProvider } from "@/lib/AnimalTrackingContext";
+import AuthProvider from "@/lib/AuthProvider";
+import ToastNotification from "@/components/ToastNotification";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -14,16 +18,16 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Sentinel - Real-Time Anomaly Detection Pipeline",
+  title: "Sentinel — Wildlife Conservation Monitoring",
   description:
-    "AI-powered tourist safety monitoring system using ensemble ML models. Real-time GPS trajectory analysis, anomaly detection, and intelligent alert dispatching.",
+    "Real-time wildlife anomaly detection and conservation monitoring. Track endangered species, detect range anomalies, and protect critical habitats worldwide.",
   keywords: [
+    "wildlife conservation",
+    "endangered species",
     "anomaly detection",
-    "machine learning",
-    "tourist safety",
-    "real-time monitoring",
-    "ensemble models",
-    "IoT",
+    "species monitoring",
+    "habitat protection",
+    "conservation technology",
   ],
 };
 
@@ -38,7 +42,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#09090b] text-white noise-bg`}
       >
         <div className="radar-grid-bg fixed inset-0 -z-10" />
-        {children}
+        <AuthProvider>
+          <SentinelProvider>
+            <AnimalTrackingProvider>
+              {children}
+              <ToastNotification />
+            </AnimalTrackingProvider>
+          </SentinelProvider>
+        </AuthProvider>
       </body>
     </html>
   );
