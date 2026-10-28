@@ -111,9 +111,16 @@ export default function WildlifeMapInner({
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", borderRadius: "0.75rem" }}
       >
+        {/* Esri Dark Gray Canvas — free, keyless basemap (CARTO now requires an API key) */}
         <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, DeLorme, NAVTEQ'
+          url="https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          maxZoom={16}
+        />
+        <TileLayer
+          attribution='Tiles &copy; <a href="https://www.esri.com/">Esri</a>'
+          url="https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+          maxZoom={16}
         />
 
         {/* FlyTo handler */}
